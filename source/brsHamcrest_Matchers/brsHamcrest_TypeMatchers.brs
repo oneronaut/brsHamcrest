@@ -197,3 +197,20 @@ function aLongInteger () as Object
 
     return matcher
 end function
+
+
+'Matcher to test the type is one of the numeric types (Float/Double/Integer/LongInteger)
+'
+'Example:
+'assertThat(foo, is(aNumber()))
+'
+'@return {Object<Matcher>} A Matcher to match on the LongInteger type
+function aNumber () as Object
+    matcher = BaseMatcher()
+
+    matcher.doMatch = function (target as Dynamic) as Boolean
+        return (aFloat().doMatch(target) OR aDouble().doMatch(target) OR aInteger().doMatch(target) OR aLongInteger().doMatch(target))
+    end function
+
+    return matcher
+end function
