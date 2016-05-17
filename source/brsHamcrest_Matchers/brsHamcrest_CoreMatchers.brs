@@ -35,7 +35,7 @@ function isNot (matcher as Object) as Object
 
         retVal = newMatcher
     else
-        HamcrestError("Type Mismatch: Expected a Matcher and encountered a ";type(matcher))
+        HamcrestError("Type Mismatch: Expected a Matcher and encountered a "+type(matcher))
     end if
     return retVal
 end function
@@ -51,7 +51,7 @@ end function
 function allOf (arrayOfMatchers as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.doMatch = function (target as Dynamic) {
+    matcher.doMatch = function (target as Dynamic)
         result = false
         if (type(arrayOfMatchers) = "roArray")
             failure = false
@@ -59,15 +59,15 @@ function allOf (arrayOfMatchers as Object) as Object
                 if (matcher.CLASS_TYPE = "Matcher")
                     failure = (NOT matcher.doMatch(target))
                 else
-                    HamcrestError("Type Mismatch: Expected a Matcher and encountered a ";type(matcher))
+                    HamcrestError("Type Mismatch: Expected a Matcher and encountered a "+type(matcher))
                 end if
             end for
             result = (NOT failure)
         else
-            HamcrestError("Type Mismatch: Expected an Array and encountered a ";type(arrayOfMatchers))
+            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(arrayOfMatchers))
         end if
         return result
-    }
+    end function
 
     return matcher
 end function

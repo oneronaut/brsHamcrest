@@ -11,3 +11,7 @@ function HamcrestError (message as String) as Void
     if (message <> Invalid) then print "[brsHamcrest] " + message
     stop
 end function
+
+function HasInterface (obj as Dynamic, interfaceName as String) as Boolean
+    return (GetInterface(obj, interfaceName) <> Invalid)
+end function

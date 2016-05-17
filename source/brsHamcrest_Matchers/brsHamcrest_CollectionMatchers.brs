@@ -15,7 +15,7 @@ function anEmptyCollection () as Object
 
     matcher.doMatch = function (target as Dynamic) as Boolean
         retVal = false
-        if (GetInterface(target, "ifEnum") <> Invalid)
+        if (HasInterface(target, "ifEnum"))
             if target.IsEmpty() then retVal = true
         else
             HamcrestError("Type Mismatch: The target object is not an enumerable type.")
@@ -27,7 +27,7 @@ function anEmptyCollection () as Object
 end function
 
 
-'Matcher to test the given collection contains zero elements
+'Matcher to test the given collection contains the given keys
 '
 'Example:
 'assertThat(foo, containsKeys([key1, key2, ...]))
@@ -37,18 +37,26 @@ end function
 function containsKeys (keyArray as Object) as Object
     matcher = BaseMatcher()
 
+    matcher.keyArray = keyArray
+
     matcher.doMatch = function (target as Dynamic) as Boolean
         result = false
-        if (GetInterface(target, "ifEnum") <> Invalid AND GetInterface(keyArray, "ifEnum"))
-            failure = false
-            for each key in keyArray
-                if (target[key] = Invalid) then failure = true
-            end for
-            result = (NOT failure)
+        if (type(m.keyArray) = "roArray")
+            if (NOT m.keyArray.IsEmpty())
+                if (HasInterface(target, "ifEnum"))
+                    failure = false
+                    for each key in m.keyArray
+                        if (target[key] = Invalid) then failure = true
+                    end for
+                    result = (NOT failure)
+                else
+                    HamcrestError("Type Mismatch: Expected an enumerable type and encountered a "+type(target))
+                end if
+            end if
         else
-            HamcrestError("Type Mismatch: The target object is not an enumerable type.")
+            HamcrestError("Type Mismatch: Expected a roArray and encountered a "+type(m.keyArray))
         end if
-        return retVal
+        return result
     end function
 
     return matcher
@@ -67,14 +75,14 @@ function containsKeyValuePairs (keyValuePairs as Object) as Boolean
 
     matcher.doMatch = function (target as Dynamic) as Boolean
         retVal = false
-        if (GetInterface(target, "ifAssociativeArray") <> Invalid AND GetInterface(keyValuePairsArray, "ifAssociativeArray"))
+        if (type(target) = "roAssociativeArray" AND type(keyValuePairsArray) = "roAssociativeArray")
             failure = false
             for each key in keyValuePairs
                 if (target[key] = Invalid OR (target[key] <> Invalid AND target[key] <> keyValuePairs[key])) then failure = true
             end for
             result = (NOT failure)
         else
-            HamcrestError("Type Mismatch: The target object is not an Associative Array.")
+            HamcrestError("Type Mismatch: Expected an Associative Array and encountered a "+type(target))
         end if
         return retVal
     end function
@@ -93,11 +101,13 @@ end function
 function inCollection (collection as Object) as Object
     matcher = BaseMatcher()
 
+    matcher.collection = collection
+
     matcher.doMatch = function (target as Dynamic) as Boolean
         retVal = false
-        if (GetInterface(collection, "ifEnum") <> Invalid)
+        if (GetInterface(m.collection, "ifEnum") <> Invalid)
             failure = false
-            for each value in collection
+            for each value in m.collection
                 if (GetInterface(value, "ifEnum") <> Invalid)
                     if (NOT inCollection(value).doMatch(target))
                         failure = true
@@ -108,7 +118,7 @@ function inCollection (collection as Object) as Object
             end for
             result = (NOT failure)
         else
-            HamcrestError("Type Mismatch: Expected a Collection (implements ifEnum) and encountered a ";type(collection))
+            HamcrestError("Type Mismatch: Expected a Collection (implements ifEnum) and encountered a "+type(m.collection))
         end if
         return retVal
     end function

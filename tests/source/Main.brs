@@ -4,6 +4,7 @@ function Main()
     print "                Running unit tests!                "
     print "###################################################"
 
+    ' Start brstest
     BrsTestMain()
 
     print "###################################################"
