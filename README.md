@@ -1,8 +1,10 @@
 # brsHamcrest
 Hamcrest implementation in BrightScript
 
+
 ## Usage
 brsHamcrest is designed for use standalone or with an existing unit test framework (such as [brstest](https://github.com/MarkRoddy/brstest)).
+
 
 ### Assertions
 You can use either `assertThat()` or `that()` to assert that a Matcher returns positive:
@@ -18,6 +20,24 @@ assertTrue(that(foo, is(aString())))
 assertTrue(that(foo, startsWithString("bar")))
 assertTrue(that(foo, is(allOf([aNumber(), greaterThan(5.3), lessThan(10)]))))
 ```
+
+
+### Matcher Wrappers
+You can wrap a Matcher (or several Matchers) in various wrappers:
+```brightscript
+' is() doesn't change logic, just improves readability:
+assertThat(foo, is(aString()))
+
+' isNot() inverses a Matcher's output:
+assertThat(foo, isNot(aString()))
+
+' allOf() / anyOf() / noneOf() checks against several Matchers:
+assertThat(foo, is(allOf([aNumber(), lessThan(5)])))
+assertThat(foo, is(anyOf([anArray(), anAssociativeArray()])))
+assertThat(foo, is(noneOf([startsWithString("bar"), endsWithString("bar")])))
+```
+As you can see in the examples, you can chain up Wrappers to form an easy to read assertion. This can read to some different structures but equal outputs, for example `isNot(anyOf())` is equal to `is(noneOf())`, it's up to you.
+
 
 ### Matchers
 Included are various Matchers, such as:
