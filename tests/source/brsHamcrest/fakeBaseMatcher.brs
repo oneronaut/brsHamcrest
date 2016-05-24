@@ -4,7 +4,7 @@ function FakeBaseMatcher () as Object
 
         willMatch: true
 
-        doMatch: function (target as Dynamic) as Boolean
+        doMatch: function (target=Invalid as Dynamic) as Boolean
             return m.willMatch
         end function
     }

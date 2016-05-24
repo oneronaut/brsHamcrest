@@ -271,3 +271,124 @@ sub test_containsKeys_assocArrayIsEmpty (t as Object)
 
     teardown_brsHamcrest_CollectionMatchers()
 end sub
+
+
+'containsKeyValuePairs()
+sub test_containsKeyValuePairs_hasAllKeyValuePairs (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+    
+    'GIVEN'
+    testKeyValuePairArray = [{"foo0": "bar0"}, {"foo1": "bar1"}, {"foo2": "bar2"}]
+    testAssocArray = {foo: "bar0", foo1: "bar1", foo2: "bar2"}
+
+    'WHEN'
+    result = containsKeyValuePairs(testKeyValuePairArray).doMatch(testAssocArray)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
+sub test_containsKeyValuePairs_hasSomeKeyValuePairs (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+    
+    'GIVEN'
+    testKeyValuePairArray = [{"foo0": "bar0"}, {"foo1": "bar1"}, {"foo2": "bar2"}]
+    testAssocArray = {foo: "bar0", foo1: "bar1"}
+
+    'WHEN'
+    result = containsKeyValuePairs(testKeyValuePairArray).doMatch(testAssocArray)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
+sub test_containsKeyValuePairs_hasNoKeyValuePairs (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+    
+    'GIVEN'
+    testKeyValuePairArray = [{"foo0": "bar0"}, {"foo1": "bar1"}, {"foo2": "bar2"}]
+    testAssocArray = {}
+
+    'WHEN'
+    result = containsKeyValuePairs(testKeyValuePairArray).doMatch(testAssocArray)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
+'inCollection()
+sub test_inCollection_simpleTypeTrue (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    testValue = test.knownString
+    testCollection = ["foo", "bar", test.knownString]
+
+    'WHEN'
+    result = inCollection(testCollection).doMatch(testValue)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
+sub test_inCollection_simpleTypeFalse (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    testValue = test.knownString
+    testCollection = ["foo", "bar"]
+
+    'WHEN'
+    result = inCollection(testCollection).doMatch(testValue)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
+sub test_inCollection_assocArrayTrue (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    testAssocArray = {foo2: "bar2"}
+    testCollection = [{foo: "bar"}, {foo1: "bar1"}, {foo2: "bar2"}]
+
+    'WHEN'
+    result = inCollection(testCollection).doMatch(testValue)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
+sub test_inCollection_assocArrayFalse (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    testAssocArray = {foo2: "bar2"}
+    testCollection = [{foo: "bar"}, {foo1: "bar1"}]
+
+    'WHEN'
+    result = inCollection(testCollection).doMatch(testValue)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
