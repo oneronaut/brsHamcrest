@@ -30,7 +30,7 @@ function isNot (matcher as Object) as Object
 
         newMatcher.doMatchOrig = newMatcher.doMatch
         newMatcher.doMatch = function (target as Dynamic) as Boolean
-            return (m.doMatchOrig(target) = False)
+            return (NOT m.doMatchOrig(target))
         end function
 
         retVal = newMatcher
@@ -41,47 +41,97 @@ function isNot (matcher as Object) as Object
 end function
 
 
-'Creates a matcher that wraps an array of existing matchers, only passing if all Matchers are positive.
+'Creates a matcher that checks against array of matchers, only passing if all matchers are positive.
 '
 'Example:
 'assertThat(foo, is(allOf([aString(), inCollection(bar)])))
 '
-'@param matcher {Object<Matcher>} A Matcher
+'@param arrayOfMatchers {Array<Matcher>} An array of Matchers
 '@return {Object<Matcher>} A Matcher
 function allOf (arrayOfMatchers as Object) as Object
     matcher = BaseMatcher()
 
+    matcher.arrayOfMatchers = arrayOfMatchers
+
     matcher.doMatch = function (target as Dynamic)
-        result = false
-        if (type(arrayOfMatchers) = "roArray")
-            failure = false
-            for each matcher in arrayOfMatchers
-                if (matcher.CLASS_TYPE = "Matcher")
-                    failure = (NOT matcher.doMatch(target))
+        failure = false
+        if (type(m.arrayOfMatchers) = "roArray")
+            for each matcherObj in m.arrayOfMatchers
+                if (matcherObj.CLASS_TYPE = "Matcher")
+                    failure = (NOT matcherObj.doMatch(target))
                 else
-                    HamcrestError("Type Mismatch: Expected a Matcher and encountered a "+type(matcher))
+                    HamcrestError("Type Mismatch: Expected a Matcher and encountered a "+type(matcherObj))
                 end if
             end for
-            result = (NOT failure)
         else
-            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(arrayOfMatchers))
+            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
         end if
-        return result
+        return (NOT failure)
     end function
 
     return matcher
 end function
 
 
-'TODO'
-' assertThat(foo, is(anyOf([matcher1, matcher2, ...])))
+'Creates a matcher that checks against array of matchers, passing if any of the matchers are positive.
+'
+'Example:
+'assertThat(foo, is(anyOf([aString(), inCollection(bar)])))
+'
+'@param arrayOfMatchers {Array<Matcher>} An array of Matchers
+'@return {Object<Matcher>} A Matcher
 function anyOf (arrayOfMatchers as Object) as Object
+    matcher = BaseMatcher()
 
+    matcher.arrayOfMatchers = arrayOfMatchers
+
+    matcher.doMatch = function (target as Dynamic)
+        failure = true
+        if (type(m.arrayOfMatchers) = "roArray")
+            for each matcherObj in m.arrayOfMatchers
+                if (matcherObj.doMatch(target))
+                    failure = false
+                    exit for
+                end if
+            end for
+        else
+            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
+        end if
+
+        return (NOT failure)
+    end function
+
+    return matcher
 end function
 
 
-'TODO'
-' assertThat(foo, is(noneOf([matcher1, matcher2, ...])))
+'Creates a matcher that checks against array of matchers, only passing if none of the matchers are positive.
+'
+'Example:
+'assertThat(foo, is(noneOf([aString(), inCollection(bar)])))
+'
+'@param arrayOfMatchers {Array<Matcher>} An array of Matchers
+'@return {Object<Matcher>} A Matcher
 function noneOf(arrayOfMatchers as Object) as Object
+    matcher = BaseMatcher()
 
+    matcher.arrayOfMatchers = arrayOfMatchers
+
+    matcher.doMatch = function (target as Dynamic)
+        failure = false
+        if (type(m.arrayOfMatchers) = "roArray")
+            for each matcherObj in m.arrayOfMatchers
+                if (matcherObj.doMatch(target))
+                    failure = true
+                    exit for
+                end if
+            end for
+        else
+            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
+        end if
+
+        return (NOT failure)
+    end function
+
+    return matcher
 end function
