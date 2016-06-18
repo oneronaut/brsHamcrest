@@ -63,7 +63,7 @@ function containsKeys (keyArray as Object) as Object
 end function
 
 
-'Matcher to test the given collection contains zero elements
+'Matcher to test the given collection contains the all of the key-value pairs in the given roAssociativeArray
 '
 'Example:
 'assertThat(foo, containsKeyValuePairs({key1: value1, key2: value2, ...}))

@@ -21,6 +21,7 @@ assertTrue(that(foo, startsWithString("bar")))
 assertTrue(that(foo, is(allOf([aNumber(), greaterThan(5.3), lessThan(10)]))))
 ```
 
+For more information, see the [Assertions wiki page](https://github.com/imbenjamin/brsHamcrest/wiki/Assertions).
 
 ### Matcher Wrappers
 You can wrap a Matcher (or several Matchers) in various wrappers:
@@ -37,6 +38,8 @@ assertThat(foo, is(anyOf([anArray(), anAssociativeArray()])))
 assertThat(foo, is(noneOf([startsWithString("bar"), endsWithString("bar")])))
 ```
 As you can see in the examples, you can chain up Wrappers to form an easy to read assertion. This can read to some different structures but equal outputs, for example `isNot(anyOf())` is equal to `is(noneOf())`, it's up to you.
+
+For more information, see the [Core Matchers wiki page](https://github.com/imbenjamin/brsHamcrest/wiki/Core-Matchers).
 
 
 ### Matchers
@@ -66,6 +69,8 @@ assertThat(myAssocArray, containsKeyValuePairs([{foo: "bar"}, {someKey: "someVal
 ```
 
 Feel free to create your own Matchers, just extend from `BaseMatcher` and ensure that the `doMatch()` function returns a `Boolean`.
+
+For more information, see the [Matcher pages available on the wiki](https://github.com/imbenjamin/brsHamcrest/wiki).
 
 ## Unit Tests
 brsHamcrest is fully unit tested. the `tests` directory contains the unit test source files and testrunner utility (using [brstestrunner](https://github.com/sky-uk/roku-brstestrunner)). To run the unit tests, execute `make test` from the project directory (where `Makefile` is located).

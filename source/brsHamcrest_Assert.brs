@@ -17,7 +17,7 @@ function that(target as Dynamic, matcher as Object) as Boolean
 end function
 
 
-'Asserts that the given thing matches the given Matcher
+'Asserts that the given Matcher returns positive against the given value
 '
 'Example:
 'success = assertThat(foo, is(aString()))
