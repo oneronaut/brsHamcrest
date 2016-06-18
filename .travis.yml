@@ -1,0 +1,6 @@
+addons:
+ apt:
+  packages:
+   - make
+   - telnet
+script: make remove && make test
