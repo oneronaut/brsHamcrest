@@ -176,7 +176,7 @@ zip:
 	@echo "    Zip it all up in $(APP_ZIP_FILE)!"
 	@echo "--------------------------------------------------------"
 	@echo ""
-
+	ls
 	pushd ./$(BUILDDIR)/; \
 	zip -q -0 -r "../$(APP_ZIP_FILE)" . -i \*.png $(ZIP_EXCLUDES); \
 	zip -q -9 -r "../$(APP_ZIP_FILE)" . -x \*.png $(ZIP_EXCLUDES); \
