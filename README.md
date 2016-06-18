@@ -65,7 +65,7 @@ assertThat("foobar", containsStringsInOrder(["foo", "bar"]))
 ' Collection Matchers
 assertThat(myArray, is(anEmptyCollection()))
 assertThat("foo", is(inCollection(["foo", "bar"])))
-assertThat(myAssocArray, containsKeyValuePairs([{foo: "bar"}, {someKey: "someValue"}]))
+assertThat(myAssocArray, containsKeyValuePairs({foo: "bar", someKey: "someValue"}))
 ```
 
 Feel free to create your own Matchers, just extend from `BaseMatcher` and ensure that the `doMatch()` function returns a `Boolean`.
