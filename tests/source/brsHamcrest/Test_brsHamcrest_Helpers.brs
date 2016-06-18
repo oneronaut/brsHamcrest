@@ -1,3 +1,7 @@
+sub test_broken (t as Object)
+    t.assertTrue(False)
+end sub
+
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
