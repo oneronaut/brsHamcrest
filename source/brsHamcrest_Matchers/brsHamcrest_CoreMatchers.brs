@@ -86,19 +86,17 @@ function anyOf (arrayOfMatchers as Object) as Object
     matcher.arrayOfMatchers = arrayOfMatchers
 
     matcher.doMatch = function (target as Dynamic)
-        failure = true
         if (type(m.arrayOfMatchers) = "roArray")
             for each matcherObj in m.arrayOfMatchers
                 if (matcherObj.doMatch(target))
-                    failure = false
-                    exit for
+                    return true
                 end if
             end for
         else
             HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
         end if
 
-        return (NOT failure)
+        return false
     end function
 
     return matcher
@@ -118,19 +116,17 @@ function noneOf(arrayOfMatchers as Object) as Object
     matcher.arrayOfMatchers = arrayOfMatchers
 
     matcher.doMatch = function (target as Dynamic)
-        failure = false
         if (type(m.arrayOfMatchers) = "roArray")
             for each matcherObj in m.arrayOfMatchers
                 if (matcherObj.doMatch(target))
-                    failure = true
-                    exit for
+                    return false
                 end if
             end for
         else
             HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
         end if
 
-        return (NOT failure)
+        return true
     end function
 
     return matcher

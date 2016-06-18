@@ -37,15 +37,13 @@ function containsStrings (arrayOfStrings as Object) as Object
     matcher.stringArray = arrayOfStrings
 
     matcher.doMatch = function (target as String) as Boolean
-        failure = false
         for each s in m.stringArray
             if (NOT containsString(s).doMatch(target))
-                failure = true
-                exit for
+                return false
             end if
         end for
 
-        return (NOT failure)
+        return true
     end function
 
     return matcher
