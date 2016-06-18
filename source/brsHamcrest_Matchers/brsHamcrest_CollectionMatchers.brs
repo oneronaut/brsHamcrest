@@ -15,7 +15,7 @@ function anEmptyCollection () as Object
 
     matcher.doMatch = function (target as Dynamic) as Boolean
         failure = false
-        if (HasInterface(target, "ifEnum"))
+        if (isEnumerable(target))
             if (NOT target.IsEmpty()) then failure = true
         else
             HamcrestError("Type Mismatch: The target object is not an enumerable type.")
@@ -50,6 +50,8 @@ function containsKeys (keyArray as Object) as Object
                 else
                     HamcrestError("Type Mismatch: Expected an enumerable type and encountered a "+type(target))
                 end if
+            else
+                failure = true
             end if
         else
             HamcrestError("Type Mismatch: Expected a roArray and encountered a "+type(m.keyArray))
@@ -68,7 +70,7 @@ end function
 '
 '@param keyValuePairs {Object<AssociativeArray>} Associative Array of key-value pairs to look for
 '@return {Object<Matcher>} A Matcher
-function containsKeyValuePairs (keyValuePairs as Object) as Boolean
+function containsKeyValuePairs (keyValuePairs as Object) as Object
     matcher = BaseMatcher()
 
     matcher.keyValuePairs = keyValuePairs
@@ -102,21 +104,30 @@ function inCollection (collection as Object) as Object
     matcher.collection = collection
 
     matcher.doMatch = function (target as Dynamic) as Boolean
-        failure = false
-        if (GetInterface(m.collection, "ifEnum") <> Invalid)
+        match = false
+        if (isEnumerable(m.collection))
             for each value in m.collection
-                if (GetInterface(value, "ifEnum") <> Invalid)
-                    if (NOT inCollection(value).doMatch(target))
-                        failure = true
+                if (isEnumerable(value))
+                    if (inCollection(value).doMatch(target))
+                        match = true
+                        exit for
                     end if
-                else if (value <> target)
-                    failure = true
+                else if (type(target) = "roAssociativeArray")
+                    for each targetKey in target
+                        if (targetKey = value AND target[targetKey] = m.collection[value])
+                            match = true
+                            exit for
+                        end if
+                    end for
+                else if (value = target)
+                    match = true
+                    exit for
                 end if
             end for
         else
             HamcrestError("Type Mismatch: Expected a Collection (implements ifEnum) and encountered a "+type(m.collection))
         end if
-        return (NOT failure)
+        return match
     end function
 
     return matcher

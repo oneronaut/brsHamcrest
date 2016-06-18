@@ -1,641 +1,283 @@
-
-APPNAME=brsHamcrest
-
-
-#########################################################################
-# app.mk: common include file for application Makefiles.
+# #########################################################################
 #
-# Makefile common usage:
+# Makefile Usage:
 # > make
-# > make run
 # > make install
 # > make remove
-# > make test
-#
-# Makefile less common usage:
-# > make art-opt
 # > make pkg
-# > make install_native
-# > make remove_native
-# > make tr
+# > make clean
 #
-# Important Notes:
-# To use the "run", "install" and "remove" targets to install your
-# application directly from the shell, you must do the following:
+# Use the "NO_AUTH=1" option to deploy to roku boxes with firmware < 5.2
+#	that do not have the developer username/password
+# Important Notes: You must do the following to use this Makefile:
 #
-# 1) Make sure that you have the curl command line executable in your path.
-# 2) Set the variable ROKU_DEV_TARGET in your environment to the IP
-#    address of your Roku box, e.g.
-#      export ROKU_DEV_TARGET=192.168.1.1
-# 3) Set the variable DEVPASSWORD in your environment with the developer
-#    password that you have set for your Roku box, e.g.
-#      export DEVPASSWORD=mypassword
-#    (If you don't set this, you will be prompted for every install command.)
+# 1) Make sure that you have the make and curl commands line executables
+#	 in your path
+# 2) Define ROKU_DEV_TARGET either below, or in an environment variable
+#	 set to the IP address of your Roku box.
+#	 (e.g. export ROKU_DEV_TARGET=192.168.1.1)
+#
 ##########################################################################
 
-##########################################################################
-# Specifying application files to be packaged:
-#
-# By default, ZIP_EXCLUDE will exclude well-known source directories and
-# files that should typically not be included in the application
-# distribution.
-#
-# If you want to entirely override the default settings, you can put your
-# own definition of ZIP_EXCLUDE in your Makefile.
-#
-# Example:
-#   ZIP_EXCLUDE= -x keys\*
-# will exclude all files from the keys directory (and only those files).
-#
-# To exclude using more than one pattern, use additional '-x <pattern>'
-# arguments, e.g.
-#   ZIP_EXCLUDE= -x \*.pkg -x storeassets\*
-#
-# If you just need to add additional files to the ZIP_EXCLUDE list, you can
-# define ZIP_EXCLUDE_LOCAL in your Makefile.  This pattern will be appended
-# to the default ZIP_EXCLUDE pattern.
-#
-# Example:
-#   ZIP_EXCLUDE_LOCAL= -x goldens\*
-##########################################################################
 
-# improve performance and simplify Makefile debugging by omitting
-# default language rules that don't apply to this environment.
-MAKEFLAGS += --no-builtin-rules
-.SUFFIXES:
+# ----------------- YOU CAN EDIT THE VARIABLES BELOW -----------------
 
-HOST_OS := unknown
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-	HOST_OS := macos
-else ifeq ($(UNAME_S),Linux)
-	HOST_OS := linux
-else ifneq (,$(findstring CYGWIN,$(UNAME_S)))
-	HOST_OS := cygwin
-endif
+# Name your app! This will be used for the name of the zip file created
+# 	and for packaging the app before publishing to the channel store.
+APPNAME = brsHamcrest
 
-IS_TEAMCITY_BUILD ?=
-ifneq ($(TEAMCITY_BUILDCONF_NAME),)
-IS_TEAMCITY_BUILD := true
-endif
+# The username/password you set on your Roku when enabling developer mode
+# You are advised to use rokudev / abcd321 to help working together!
+ROKU_DEV_USERNAME = rokudev
+ROKU_DEV_PASSWORD = abcd321
 
-# We want to be able to use escape sequences with echo
-ifeq ($(HOST_OS),macos)
-ECHO := echo
-else
-ECHO := echo -e
-endif
+# The ip address of the roku box you want to deploy a build to.
+# If you use only one box, you can set this in an environment variable
+#	but this value will override it
+# ROKU_DEV_TARGET = 172.20.76.18
 
-# get the root directory in absolute form, so that current directory
-# can be changed during the make if needed.
-APPS_ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
-# the current directory is the app root directory
-SOURCEDIR := .
-
-DISTREL := $(APPS_ROOT_DIR)/dist
-COMMONREL := $(APPS_ROOT_DIR)/common
-
-ZIPREL := $(DISTREL)/apps
-PKGREL := $(DISTREL)/packages
-TESTREL := $(DISTREL)/tests
-CHECK_TMP_DIR := $(DISTREL)/tmp-check
-
-ifdef BUILD_NUMBER
-	APP_ZIP_FILE := $(ZIPREL)/$(APPNAME)_$(PLATFORM)_$(AUDIENCE)_$(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER).zip
-	APP_PKG_FILE := $(PKGREL)/$(APPNAME)_$(PLATFORM)_$(AUDIENCE)_$(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER).pkg
-	APP_TEST_RESULTS_FILE := $(TESTREL)/$(APPNAME)_$(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER).xml
-	APP_VERSION := $(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
-else
-	APP_ZIP_FILE := $(ZIPREL)/$(APPNAME).zip
-	APP_PKG_FILE := $(PKGREL)/$(APPNAME).pkg
-	APP_TEST_RESULTS_FILE := $(TESTREL)/$(APPNAME).xml
-endif
-
-# these variables are only used for the .pkg file version tagging.
-APP_NAME := $(APPNAME)
-ifeq ($(IS_TEAMCITY_BUILD),true)
-APP_NAME    := $(subst /,-,$(TEAMCITY_BUILDCONF_NAME))
-APP_VERSION := $(BUILD_NUMBER)
-endif
-
-APP_BUILD_DIR := $(SOURCEDIR)/build
-APP_TEST_DIR := $(SOURCEDIR)/tests
-
-# Checks if a specific folder of tests has been set - if empty, run all tests
-ifeq ($(TEST_FOLDER), )
-	TEST_SUITES := source/*
-else
-	TEST_SUITES := $(TEST_FOLDER)
-endif
-
-IMPORTFILES := $(foreach f,$(IMPORTS),$(COMMONREL)/$f.brs)
-
-APP_LIBSTUB_DIR := $(SOURCEDIR)/libstub
-
-# ROKU_NATIVE_DEV must be set in the calling environment to
-# the firmware native-build source directory
-NATIVE_DIST_DIR := $(ROKU_NATIVE_DEV)/dist
-#
-NATIVE_DEV_REL  := $(NATIVE_DIST_DIR)/rootfs/Linux86_dev.OBJ/root/nvram/incoming
-NATIVE_DEV_PKG  := $(NATIVE_DEV_REL)/dev.zip
-NATIVE_PLETHORA := $(NATIVE_DIST_DIR)/application/Linux86_dev.OBJ/root/bin/plethora
-NATIVE_TICKLER  := $(NATIVE_PLETHORA) tickle-plugin-installer
-
-# only Linux host is supported for these tools currently
-APPS_TOOLS_DIR    := $(APPS_ROOT_DIR)/tools/$(HOST_OS)/bin
-
-APP_PACKAGE_TOOL  ?= $(APPS_TOOLS_DIR)/app-package
-MAKE_TR_TOOL      ?= $(APPS_TOOLS_DIR)/maketr
-BRIGHTSCRIPT_TOOL ?= $(APPS_TOOLS_DIR)/brightscript
-
-# if building from a firmware tree, use the BrightScript libraries from there
-ifneq (,$(wildcard $(APPS_ROOT_DIR)/../3rdParty/brightscript/Scripts/LibCore/.))
-BRIGHTSCRIPT_LIBS_DIR ?= $(APPS_ROOT_DIR)/../3rdParty/brightscript/Scripts/LibCore
-endif
-# else use the reference libraries from the tools directory.
-BRIGHTSCRIPT_LIBS_DIR ?= $(APPS_ROOT_DIR)/tools/brightscript/Scripts/LibCore
+# If your roku box has authentication active (Roku firmwares 5.2 and above),
+#	set this to 0
+# If you use only one box, you can set this in an environment variable
+#	but this value will override it
+NO_AUTH=0
 
 APP_KEY_PASS_TMP := /tmp/app_key_pass
 DEV_SERVER_TMP_FILE := /tmp/dev_server_out
 
-# The developer password that was set on the player is required for
-# plugin_install operations on modern versions of firmware.
-# It may be pre-specified in the DEVPASSWORD environment variable on entry,
-# otherwise the make will stop and prompt the user to enter it when needed.
-ifdef DEVPASSWORD
-	USERPASS := rokudev:$(DEVPASSWORD)
+
+
+# --------------------------------------------------------------------------------
+# ---------------- STOP EDITING HERE. DON'T CHANGE ANYTHING BELOW!! --------------
+# --------------------------------------------------------------------------------
+
+APP_PKG_NAME := $(APPNAME)
+BUILDDIR = build
+OUT_DIR = out
+PKG_DIR = pkg
+TST_DIR = tst
+
+# ZIP and PKG file name
+ifdef BUILD_NUMBER
+	APP_ZIP_FILE := $(OUT_DIR)/$(APPNAME)_$(PLATFORM)_$(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER).zip
+	APP_PKG_FILE := $(PKG_DIR)/$(APPNAME)_$(PLATFORM)_$(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER).pkg
+	APP_TEST_RESULTS_FILE := $(TST_DIR)/$(APPNAME)_$(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER).xml
+	APP_PKG_NAME := $(APPNAME)/$(MAJOR_VERSION).$(MINOR_VERSION).$(BUILD_NUMBER)
 else
-	USERPASS := rokudev
+	APP_ZIP_FILE := $(OUT_DIR)/$(APPNAME).zip
+	APP_PKG_FILE := $(PKG_DIR)/$(APPNAME).pkg
+	APP_TEST_RESULTS_FILE := $(TST_DIR)/$(APPNAME).xml
 endif
 
-ifeq ($(HOST_OS),macos)
-	# Mac doesn't support these args
-	CP_ARGS =
+ifdef PLATFORM
+	APP_ZIP_FILE_TO_DELETE := $(OUT_DIR)/$(APPNAME)_$(PLATFORM)*.zip
+	APP_PKG_FILE_TO_DELETE := $(PKG_DIR)/$(APPNAME)_$(PLATFORM)*.pkg
 else
-	CP_ARGS = --preserve=ownership,timestamps --no-preserve=mode
+	APP_ZIP_FILE_TO_DELETE := $(OUT_DIR)/$(APPNAME)*.zip
+	APP_PKG_FILE_TO_DELETE := $(PKG_DIR)/$(APPNAME)*.pkg
 endif
 
-# For a quick ping, we want the command to return success as soon as possible,
-# and a timeout failure in no more than a second or two.
-ifeq ($(HOST_OS),cygwin)
-	# This assumes that the Windows ping command is used, not cygwin's.
-	QUICK_PING_ARGS = -n 1 -w 1000
-else ifeq ($(HOST_OS),macos)
-	QUICK_PING_ARGS = -c 1 -t 1
-else # Linux
-	QUICK_PING_ARGS = -c 1 -w 1
-endif
+APP_INCLUDES = source
+TEST_LIBRARIES = tests
 
-ifndef ZIP_EXCLUDE
-	ZIP_EXCLUDE =
-	# exclude hidden files (name starting with .)
-	ZIP_EXCLUDE += -x .\*
-	# exclude files with name ending with ~
-	ZIP_EXCLUDE += -x \*~
-	ZIP_EXCLUDE += -x \*.pkg
-	ZIP_EXCLUDE += -x Makefile
-	ZIP_EXCLUDE += -x tests\*
-	ZIP_EXCLUDE += -x keys\*
-	ZIP_EXCLUDE += -x libapi\*
-	ZIP_EXCLUDE += -x libstub\*
-	ZIP_EXCLUDE += -x storeassets\*
-	ZIP_EXCLUDE += -x *.DS_Store*
-	ZIP_EXCLUDE += -x *.git*
-endif
-
-ZIP_EXCLUDE_PATTERN = $(ZIP_EXCLUDE)
-ZIP_EXCLUDE_PATTERN += $(ZIP_EXCLUDE_LOCAL)
-
-# Folders/files to be included in app zip
-APP_INCLUDES := source
-
-# Unit test folder and test runner script
-UNIT_TEST_FOLDER := $(APPS_ROOT_DIR)/tests/testrunner
+UNIT_TEST_FOLDER := $(TEST_LIBRARIES)/testrunner
 TEST_RUNNER_SCRIPT := $(UNIT_TEST_FOLDER)/brstestrunner.py
 
-# -------------------------------------------------------------------------
-# Colorized output support.
-# If you don't want it, do 'export APP_MK_COLOR=false' in your env.
-# -------------------------------------------------------------------------
-ifndef APP_MK_COLOR
-APP_MK_COLOR := false
-ifeq ($(TERM),$(filter $(TERM),xterm xterm-color xterm-256color))
-	APP_MK_COLOR := true
+# Checks if a specific folder of tests has been set - if empty, run all tests
+ifeq ($(TEST_FOLDER), )
+	TEST_SUITES = tests/testsSuites
+else
+	TEST_SUITES = $(TEST_FOLDER)
 endif
-endif
+ZIP_EXCLUDES = --exclude=*.DS_Store* --exclude=*.git*
 
-COLOR_START  :=
-COLOR_INFO   :=
-COLOR_PROMPT :=
-COLOR_DONE   :=
-COLOR_ERR    :=
-COLOR_OFF    :=
-
-ifeq ($(APP_MK_COLOR),true)
-	# ANSI color escape codes:
-
-	#	\e[0;30m	black
-	#	\e[0;31m	red
-	#	\e[0;32m	green
-	#	\e[0;33m	yellow
-	#	\e[0;34m	blue
-	#	\e[0;35m	magenta
-	#	\e[0;36m	cyan
-	#	\e[0;37m	light gray
-
-	#	\e[1;30m	gray
-	#	\e[1;31m	light red
-	#	\e[1;32m	light green
-	#	\e[1;33m	light yellow
-	#	\e[1;34m	light blue
-	#	\e[1;35m	light purple
-	#	\e[1;36m	light cyan
-	#	\e[1;37m	white
-
-	COLOR_START  := \033[1;36m
-	COLOR_INFO   := \033[1;35m
-	COLOR_PROMPT := \033[0;31m
-	COLOR_DONE   := \033[1;32m
-	COLOR_ERROR  := \033[1;31m
-	COLOR_OFF    := \033[0m
-endif
-
-# -------------------------------------------------------------------------
-# $(APPNAME): the default target is to create the zip file for the app.
-# This contains the set of files that are to be deployed on a Roku.
-# -------------------------------------------------------------------------
-.PHONY: $(APPNAME)
 $(APPNAME): build zip cleanup
-	@$(ECHO) "$(COLOR_DONE)*** packaging $(APPNAME) complete ***$(COLOR_OFF)"
+install: $(APPNAME) deploy
+test: build addtests zip cleanup deploy runtests
 
-# -------------------------------------------------------------------------
-# build: gather app files into $(APP_BUILD_DIR) folder.
-# This contains the set of files to be included in the app zip file.
-# -------------------------------------------------------------------------
-.PHONY: build
 build:
-	@$(ECHO) "$(COLOR_START)*** Building $(APPNAME) ***$(COLOR_OFF)"
 
-	@if [ -e "$(APP_ZIP_FILE)" ]; then \
-		$(ECHO) "  >> removing old application zip $(APP_ZIP_FILE)"; \
-		rm $(APP_ZIP_FILE); \
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "1 - I'm removing the previously built"
+	@echo "    application archive if it exists and"
+	@echo "    setting up all the required directories"
+	@echo "    for the final build"
+	@echo "--------------------------------------------------------"
+	@echo ""
+
+	@if [ -e $(APP_ZIP_FILE_TO_DELETE) ]; \
+	then \
+		echo "There is an old build here! Deleting it."; \
+		rm  $(APP_ZIP_FILE_TO_DELETE); \
+		echo "... done." ; \
 	fi
 
-	@if [ ! -d $(ZIPREL) ]; then \
-		$(ECHO) "  >> creating destination directory $(ZIPREL)"; \
-		mkdir -p $(ZIPREL); \
+	@echo ""
+
+	@if [ ! -d $(OUT_DIR) ]; \
+	then \
+		echo "Creating missing output directory."; \
+		mkdir -p $(OUT_DIR); \
+		echo "... done." ; \
 	fi
 
-	@if [ ! -w $(ZIPREL) ]; then \
-		$(ECHO) "  >> setting directory permissions for $(ZIPREL)"; \
-		chmod 755 $(ZIPREL); \
+	@if [ ! -w $(OUT_DIR) ]; \
+	then \
+		echo "Making the output directory writable."; \
+		chmod 755 $(OUT_DIR); \
+		echo "... done." ; \
 	fi
 
-	@if [ -d $(APP_BUILD_DIR) ]; then \
-		$(ECHO) "  >> removing old build directory $(APP_BUILD_DIR)"; \
-		rm -rf $(APP_BUILD_DIR); \
+	@if [ -d $(BUILDDIR) ]; \
+	then \
+		echo "There is an old build directory here! Deleting it."; \
+		rm -rf $(BUILDDIR); \
+		echo "... done." ; \
 	fi
 
-	@if [ ! -d $(APP_BUILD_DIR) ]; then \
-		$(ECHO) "  >> creating build directory $(APP_BUILD_DIR)"; \
-		mkdir -p $(APP_BUILD_DIR); \
+	@if [ ! -d $(BUILDDIR) ]; \
+	then \
+		echo "Creating a new build directory."; \
+		mkdir -p $(BUILDDIR); \
+		echo "... done." ; \
 	fi
 
-	@if [ ! -w $(APP_BUILD_DIR) ]; then \
-		$(ECHO) "  >> setting directory permissions for $(APP_BUILD_DIR)"; \
-		chmod 755 $(APP_BUILD_DIR); \
+	@if [ ! -w $(BUILDDIR) ]; \
+	then \
+		echo "Making the build directory writable."; \
+		chmod 755 $(BUILDDIR); \
+		echo "... done." ; \
 	fi
+	@echo "... all done!"
 
-	@if [ "$(IMPORTFILES)" ]; then \
-		$(ECHO) "  >> copying imports"; \
-		mkdir $(APP_BUILD_DIR)/common; \
-		cp -f $(CP_ARGS) -v $(IMPORTFILES) $(APP_BUILD_DIR)/common/; \
-	fi
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "2 - Before I can fill up this archive, I need"
+	@echo "    to have all the source code neatly in one place."
+	@echo "    So I'm copying all of that into the build"
+	@echo "    dir at $(BUILDDIR)";
+	@echo "--------------------------------------------------------"
+	@echo ""
 
-	@$(ECHO) "  >> copying $(APP_INCLUDES) into $(APP_BUILD_DIR)"
-	cp -r $(APP_INCLUDES) $(APP_BUILD_DIR)/
+	cp -r $(APP_INCLUDES) $(BUILDDIR)/
 
-# -------------------------------------------------------------------------
-# zip: create the zip file for the app.
-# This contains the set of files that are to be deployed on a Roku.
-# -------------------------------------------------------------------------
-.PHONY: zip
+	@echo "... done."
+
+
 zip:
-	@$(ECHO) "$(COLOR_START)*** Creating $(APP_ZIP_FILE) ***$(COLOR_OFF)"
 
-# Note: zip .png files without compression
-# FIXME: shouldn't it exclude .jpg too?
-# FIXME: if no .png files are found, outputs bogus "zip warning: zip file empty"
-	@$(ECHO) "  >> creating application zip $(APP_ZIP_FILE)"
-	@if [ -d $(APP_BUILD_DIR) ]; then \
-		pushd $(APP_BUILD_DIR)/; \
-		zip -0 -r "$(APP_ZIP_FILE)" . -i \*.png $(ZIP_EXCLUDE_PATTERN); \
-		zip -9 -r "$(APP_ZIP_FILE)" . -x \*.png $(ZIP_EXCLUDE_PATTERN); \
-		popd; \
-	else \
-		$(ECHO) "$(COLOR_ERROR)Source for $(APPNAME) not found at $(SOURCEDIR)$(COLOR_OFF)"; \
-	fi
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "3 - This is now done, as we're at the final step:"
+	@echo "    Zip it all up in $(APP_ZIP_FILE)!"
+	@echo "--------------------------------------------------------"
+	@echo ""
 
-# -------------------------------------------------------------------------
-# cleanup: remove build folder.
-# -------------------------------------------------------------------------
-.PHONY: cleanup
+	pushd ./$(BUILDDIR)/; \
+	zip -q -0 -r "../$(APP_ZIP_FILE)" . -i \*.png $(ZIP_EXCLUDES); \
+	zip -q -9 -r "../$(APP_ZIP_FILE)" . -x \*.png $(ZIP_EXCLUDES); \
+	popd
+	@echo "... done."
+
+
 cleanup:
-	@$(ECHO) "$(COLOR_START)*** Cleaning-up $(APP_BUILD_DIR) ***$(COLOR_OFF)"
 
-	@if [ -d $(APP_BUILD_DIR) ]; then \
-		$(ECHO) "  >> cleaning build folder"; \
-		rm -rf $(APP_BUILD_DIR); \
-	fi
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "4 - The application archive has been created! Now I'm"
+	@echo "    doing a bit of cleanup by build folder '$(BUILDDIR)'"
+	@echo "--------------------------------------------------------"
+	@echo ""
 
-# -------------------------------------------------------------------------
-# clean: remove any build output for the app.
-# -------------------------------------------------------------------------
-.PHONY: clean
-clean:
-	rm -f $(ZIPREL)/$(APPNAME)*.zip
-	rm -f $(PKGREL)/$(APPNAME)*.pkg
-	rm -f $(TESTREL)/*$(APPNAME)*.xml
-	rm -rf $(APP_BUILD_DIR)
+	rm -rf $(BUILDDIR)
+	@echo "... done."
 
-# -------------------------------------------------------------------------
-# clobber: remove any build output for the app.
-# -------------------------------------------------------------------------
-.PHONY: clobber
-clobber: clean
 
-# -------------------------------------------------------------------------
-# dist-clean: remove the dist directory for the sandbox.
-# -------------------------------------------------------------------------
-.PHONY: dist-clean
-dist-clean:
-	rm -rf $(DISTREL)/*
-
-# -------------------------------------------------------------------------
-# CHECK_OPTIONS: this is used to specify configurable options, such
-# as which version of the BrightScript library sources should be used
-# to compile the app.
-# -------------------------------------------------------------------------
-CHECK_OPTIONS =
-
-ifneq (,$(wildcard $(BRIGHTSCRIPT_LIBS_DIR)/.))
-CHECK_OPTIONS += -lib $(BRIGHTSCRIPT_LIBS_DIR)
-endif
-
-# if the app uses BS libraries, it can provide stub libraries to compile with.
-ifneq (,$(wildcard $(APP_LIBSTUB_DIR)/.))
-CHECK_OPTIONS += -applib $(APP_LIBSTUB_DIR)
-endif
-
-# -------------------------------------------------------------------------
-# check: run the desktop BrightScript compiler/check tool on the
-# application.
-# You can bypass checking on the application by setting
-# APP_CHECK_DISABLED=true in the app's Makefile or in the environment.
-# -------------------------------------------------------------------------
-.PHONY: check
-check: $(APPNAME)
-ifeq ($(APP_CHECK_DISABLED),true)
-ifeq ($(IS_TEAMCITY_BUILD),true)
-	@$(ECHO) "*** Warning: application check skipped ***"
-endif
-else
-ifeq ($(wildcard $(BRIGHTSCRIPT_TOOL)),)
-	@$(ECHO) "*** Note: application check not available ***"
-else
-	@$(ECHO) "$(COLOR_START)*** Checking application ***$(COLOR_OFF)"
-	@rm -rf $(CHECK_TMP_DIR)
-	@mkdir -p $(CHECK_TMP_DIR)
-	@unzip -q $(APP_ZIP_FILE) -d $(CHECK_TMP_DIR)
-	@$(BRIGHTSCRIPT_TOOL) check \
-		$(CHECK_OPTIONS) \
-		$(CHECK_TMP_DIR)
-	@rm -rf $(CHECK_TMP_DIR)
-	@$(ECHO) "$(COLOR_DONE)*** Checking complete ***$(COLOR_OFF)"
-endif
-endif
-
-# -------------------------------------------------------------------------
-# check-strict: run the desktop BrightScript compiler/check tool on the
-# application using strict mode.
-# -------------------------------------------------------------------------
-.PHONY: check-strict
-check-strict: $(APPNAME)
-	@$(ECHO) "$(COLOR_START)*** Checking application (strict) ***$(COLOR_OFF)"
-	@rm -rf $(CHECK_TMP_DIR)
-	@mkdir -p $(CHECK_TMP_DIR)
-	@unzip -q $(APP_ZIP_FILE) -d $(CHECK_TMP_DIR)
-	@$(BRIGHTSCRIPT_TOOL) check -strict \
-		$(CHECK_OPTIONS) \
-		$(CHECK_TMP_DIR)
-	@rm -rf $(CHECK_TMP_DIR)
-	@$(ECHO) "$(COLOR_DONE)*** Checking complete ***$(COLOR_OFF)"
-
-# -------------------------------------------------------------------------
-# GET_FRIENDLY_NAME_FROM_DD is used to extract the Roku device ID
-# from the ECP device description XML response.
-# -------------------------------------------------------------------------
-define GET_FRIENDLY_NAME_FROM_DD
-	cat $(DEV_SERVER_TMP_FILE) | \
-		grep -o "<friendlyName>.*</friendlyName>" | \
-		sed "s|<friendlyName>||" | \
-		sed "s|</friendlyName>||"
-endef
-
-# -------------------------------------------------------------------------
-# CHECK_ROKU_DEV_TARGET is used to check if ROKU_DEV_TARGET refers a
-# Roku device on the network that has an enabled developer web server.
-# If the target doesn't exist or doesn't have an enabled web server
-# the connection should fail.
-# -------------------------------------------------------------------------
-define CHECK_ROKU_DEV_TARGET
-	if [ -z "$(ROKU_DEV_TARGET)" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: ROKU_DEV_TARGET is not set.$(COLOR_OFF)"; \
-		exit 1; \
-	fi
-	$(ECHO) "$(COLOR_START)Checking dev server at $(ROKU_DEV_TARGET)...$(COLOR_OFF)"
-
-	# first check if the device is on the network via a quick ping
-	ping $(QUICK_PING_ARGS) $(ROKU_DEV_TARGET) &> $(DEV_SERVER_TMP_FILE) || \
-		( \
-			$(ECHO) "$(COLOR_ERROR)ERROR: Device is not responding to ping.$(COLOR_OFF)"; \
-			exit 1 \
-		)
-
-	# second check ECP, to verify we are talking to a Roku
-	rm -f $(DEV_SERVER_TMP_FILE)
-	curl --connect-timeout 2 --silent --output $(DEV_SERVER_TMP_FILE) \
-		http://$(ROKU_DEV_TARGET):8060 || \
-		( \
-			$(ECHO) "$(COLOR_ERROR)ERROR: Device is not responding to ECP...is it a Roku?$(COLOR_OFF)"; \
-			exit 1 \
-		)
-
-	# print the device friendly name to let us know what we are talking to
-	ROKU_DEV_NAME=`$(GET_FRIENDLY_NAME_FROM_DD)`; \
-	$(ECHO) "$(COLOR_INFO)Device reports as \"$$ROKU_DEV_NAME\".$(COLOR_OFF)"
-
-	# third check dev web server.
-	# Note, it should return 401 Unauthorized since we aren't passing the password.
-	rm -f $(DEV_SERVER_TMP_FILE)
-	HTTP_STATUS=`curl --connect-timeout 2 --silent --output $(DEV_SERVER_TMP_FILE) \
-		http://$(ROKU_DEV_TARGET)` || \
-		( \
-			$(ECHO) "$(COLOR_ERROR)ERROR: Device server is not responding...$(COLOR_OFF)"; \
-			$(ECHO) "$(COLOR_ERROR)is the developer installer enabled?$(COLOR_OFF)"; \
-			exit 1 \
-		)
-
-	$(ECHO) "$(COLOR_DONE)Dev server is ready.$(COLOR_OFF)"
-endef
-
-# -------------------------------------------------------------------------
-# CHECK_ROKU_DEV_PASSWORD is used to let the user know they might want to set
-# their DEVPASSWORD environment variable.
-# -------------------------------------------------------------------------
-define CHECK_ROKU_DEV_PASSWORD
-	if [ -z "$(DEVPASSWORD)" ]; then \
-		$(ECHO) "Note: DEVPASSWORD is not set."; \
-	fi
-endef
-
-# -------------------------------------------------------------------------
-# CHECK_DEVICE_HTTP_STATUS is used to that the last curl command
-# to the dev web server returned HTTP 200 OK.
-# -------------------------------------------------------------------------
-define CHECK_DEVICE_HTTP_STATUS
-	if [ "$$HTTP_STATUS" != "200" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: Device returned HTTP $$HTTP_STATUS$(COLOR_OFF)"; \
-		exit 1; \
-	fi
-endef
-
-# -------------------------------------------------------------------------
-# GET_PLUGIN_PAGE_RESULT_STATUS is used to extract the status message
-# (e.g. Success/Failed) from the dev server plugin_* web page response.
-# (Note that the plugin_install web page has two fields, whereas the
-# plugin_package web page just has one).
-# -------------------------------------------------------------------------
-define GET_PLUGIN_PAGE_RESULT_STATUS
-	cat $(DEV_SERVER_TMP_FILE) | \
-		grep -o "<font color=\"red\">.*" | \
-		sed "s|<font color=\"red\">||" | \
-		sed "s|</font>||"
-endef
-
-# -------------------------------------------------------------------------
-# GET_PLUGIN_PAGE_PACKAGE_LINK is used to extract the installed package
-# URL from the dev server plugin_package web page response.
-# -------------------------------------------------------------------------
-define GET_PLUGIN_PAGE_PACKAGE_LINK
-	cat $(DEV_SERVER_TMP_FILE) | \
-		grep -o "<a href=\"pkgs//[^\"]*\"" | \
-		sed "s|<a href=\"pkgs//||" | \
-		sed "s|\"||"
-endef
-
-# -------------------------------------------------------------------------
-# install: install the app as the dev channel on the Roku target device.
-# -------------------------------------------------------------------------
-.PHONY: install
-install: $(APPNAME) check deploy
-	@$(ECHO) "$(COLOR_DONE)*** install complete ***$(COLOR_OFF)"
-
-# -------------------------------------------------------------------------
-# deploy: deploy the app on the Roku target device.
-# -------------------------------------------------------------------------
-.PHONY: deploy
 deploy:
-	@$(CHECK_ROKU_DEV_TARGET)
 
-	@$(ECHO) "$(COLOR_START)Deploying $(APPNAME)...$(COLOR_OFF)"
-	@rm -f $(DEV_SERVER_TMP_FILE)
-	@$(CHECK_ROKU_DEV_PASSWORD)
-	@HTTP_STATUS=`curl --user $(USERPASS) --digest --silent --show-error \
-		-F "mysubmit=Install" -F "archive=@$(APP_ZIP_FILE)" \
-		--output $(DEV_SERVER_TMP_FILE) \
-		--write-out "%{http_code}" \
-		http://$(ROKU_DEV_TARGET)/plugin_install`; \
-	$(CHECK_DEVICE_HTTP_STATUS)
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "5 - To install your application, I first need to"
+	@echo "    check that you have given me a target to"
+	@echo "    deploy to."
+	@echo "--------------------------------------------------------"
+	@echo ""
 
-	@MSG=`$(GET_PLUGIN_PAGE_RESULT_STATUS)`; \
-	$(ECHO) "$(COLOR_DONE)Result: $$MSG$(COLOR_OFF)";\
-	SUCCESS=`echo $$MSG | grep -c -i success`; \
-	if [ "$$SUCCESS" != "1" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: Deployment failed!$(COLOR_OFF)"; \
+	@if [ -z "$(ROKU_DEV_TARGET)" ]; \
+	then \
+		echo "/!\ It seems you didn't set the ROKU_DEV_TARGET environment variable to the hostname or IP of your device, or set it in the makefile in the editable section."; \
 		exit 1; \
 	fi
+	@echo "... done."
 
-# -------------------------------------------------------------------------
-# remove: uninstall the dev channel from the Roku target device.
-# -------------------------------------------------------------------------
-.PHONY: remove
-remove:
-	@$(CHECK_ROKU_DEV_TARGET)
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "6 - Cool, I know where to install your application!"
+	@echo "    Now sending it to host $(ROKU_DEV_TARGET)"
+	@echo "--------------------------------------------------------"
+	@echo ""
 
-	@$(ECHO) "$(COLOR_START)Removing dev app...$(COLOR_OFF)"
-	@rm -f $(DEV_SERVER_TMP_FILE)
-	@$(CHECK_ROKU_DEV_PASSWORD)
-	@HTTP_STATUS=`curl --user $(USERPASS) --digest --silent --show-error \
-		-F "mysubmit=Delete" -F "archive=" \
-		--output $(DEV_SERVER_TMP_FILE) \
-		--write-out "%{http_code}" \
-		http://$(ROKU_DEV_TARGET)/plugin_install`; \
-	$(CHECK_DEVICE_HTTP_STATUS)
+	@if [ $(NO_AUTH) = 1 ]; \
+	then \
+		curl -s -S -F "mysubmit=Install" -F "archive=@$(APP_ZIP_FILE)" -F "passwd=" http://$(ROKU_DEV_TARGET)/plugin_install | grep "<font color" | sed "s/<font color=\"red\">//" | sed "s[</font>[["; \
+	else \
+		curl --user $(ROKU_DEV_USERNAME):$(ROKU_DEV_PASSWORD) --digest -s -S -F "mysubmit=Install" -F "archive=@$(APP_ZIP_FILE)" -F "passwd=" http://$(ROKU_DEV_TARGET)/plugin_install | grep "<font color" | sed "s/<font color=\"red\">//" | sed "s[</font>[["; \
+	fi
+	@echo "... done."
 
-	@MSG=`$(GET_PLUGIN_PAGE_RESULT_STATUS)`; \
-	$(ECHO) "$(COLOR_DONE)Result: $$MSG$(COLOR_OFF)"
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "7 - Hey it's all done! Your app '$(APPNAME)' should now"
+	@echo "    have oppened on your Roku! Enjoy!"
+	@echo "--------------------------------------------------------"
+	@echo ""
 
-# -------------------------------------------------------------------------
-# check-roku-dev-target: check the status of the Roku target device.
-# -------------------------------------------------------------------------
-.PHONY: check-roku-dev-target
-check-roku-dev-target:
-	@$(CHECK_ROKU_DEV_TARGET)
-
-# -------------------------------------------------------------------------
-# run: the install target is 'smart' and doesn't do anything if the package
-# didn't change.
-# But usually I want to run it even if it didn't change, so force a fresh
-# install by doing a remove first.
-# Some day we should look at doing the force run via a plugin_install flag,
-# but for now just brute force it.
-# -------------------------------------------------------------------------
-.PHONY: run
-run: remove install
 
 # -------------------------------------------------------------------------
 # pkg: use to create a pkg file from the application sources.
 #
 # Usage:
 # The application name should be specified via $APPNAME.
-# The application version should be specified via $VERSION.
 # The developer's signing password (from genkey) should be passed via
 # $APP_KEY_PASS, or via stdin, otherwise the script will prompt for it.
 # -------------------------------------------------------------------------
-.PHONY: pkg
 pkg: install
-	@$(ECHO) "$(COLOR_START)*** Creating Package ***$(COLOR_OFF)"
+	@echo "Packaging $(APPNAME) on host $(ROKU_DEV_TARGET)"
 
-	@if [ -e "$(APP_PKG_FILE)" ]; then \
-		$(ECHO) "  >> removing old application pkg $(APP_PKG_FILE)"; \
-		rm $(APP_PKG_FILE); \
+	@if [ -e $(APP_PKG_FILE_TO_DELETE) ]; \
+	then \
+		echo "There is an old package here! Deleting it."; \
+		rm  $(APP_PKG_FILE_TO_DELETE); \
+		echo "... done." ; \
 	fi
 
-	@if [ ! -d $(PKGREL) ]; then \
-		$(ECHO) "  >> creating destination directory $(PKGREL)"; \
-		mkdir -p $(PKGREL); \
+	@echo "Creating destination directory $(PKG_DIR)"
+	@if [ ! -d $(PKG_DIR) ]; \
+	then \
+		mkdir -p $(PKG_DIR); \
 	fi
 
-	@if [ ! -w $(PKGREL) ]; then \
-		$(ECHO) "  >> setting directory permissions for $(PKGREL)"; \
-		chmod 755 $(PKGREL); \
+	@echo "Setting directory permissions for $(PKG_DIR)"
+	@if [ ! -w $(PKG_DIR) ]; \
+	then \
+		chmod 755 $(PKG_DIR); \
 	fi
 
-	@$(CHECK_ROKU_DEV_TARGET)
+	@if [ -z "$(ROKU_DEV_TARGET)" ]; \
+	then \
+		echo "/!\ It seems you didn't set the ROKU_DEV_TARGET environment variable to the hostname or IP of your device, or set it in the makefile in the editable section."; \
+		exit 1; \
+	fi
 
-	@$(ECHO) "Packaging $(APP_NAME)/$(APP_VERSION) to $(APP_PKG_FILE)"
+	@echo "Packaging $(APP_PKG_NAME) to $(APP_PKG_FILE)"
 
 	@if [ -z "$(APP_KEY_PASS)" ]; then \
 		read -r -p "Password: " REPLY; \
@@ -645,300 +287,152 @@ pkg: install
 	fi
 
 	@rm -f $(DEV_SERVER_TMP_FILE)
-	@$(CHECK_ROKU_DEV_PASSWORD)
 	@PASSWD=`cat $(APP_KEY_PASS_TMP)`; \
 	PKG_TIME=`expr \`date +%s\` \* 1000`; \
-	HTTP_STATUS=`curl --user $(USERPASS) --digest --silent --show-error \
-		-F "mysubmit=Package" -F "app_name=$(APP_NAME)/$(APP_VERSION)" \
+	HTTP_STATUS=`curl --user rokudev:$(ROKU_DEV_PASSWORD) --digest --silent --show-error \
+		-F "mysubmit=Package" -F "app_name=$(APP_PKG_NAME)" \
 		-F "passwd=$$PASSWD" -F "pkg_time=$$PKG_TIME" \
 		--output $(DEV_SERVER_TMP_FILE) \
 		--write-out "%{http_code}" \
 		http://$(ROKU_DEV_TARGET)/plugin_package`; \
-	$(CHECK_DEVICE_HTTP_STATUS)
+	if [ "$$HTTP_STATUS" != "200" ]; then \
+		echo "$(COLOR_ERROR)ERROR: Device returned HTTP $$HTTP_STATUS$(COLOR_OFF)"; \
+		exit 1; \
+	fi
 
-	@MSG=`$(GET_PLUGIN_PAGE_RESULT_STATUS)`; \
+	@MSG=`cat $(DEV_SERVER_TMP_FILE) | grep -o "<font color=\"red\">.*" | sed "s|<font color=\"red\">||" | sed "s|</font>||"`; \
 	case "$$MSG" in \
 		*Success*) \
 			;; \
-		*)	$(ECHO) "$(COLOR_ERROR)Result: $$MSG$(COLOR_OFF)"; \
+		*)	@echo "Result: $$MSG"; \
 			exit 1 \
 			;; \
 	esac
 
-	@$(CHECK_ROKU_DEV_PASSWORD)
-	@PKG_LINK=`$(GET_PLUGIN_PAGE_PACKAGE_LINK)`; \
-	HTTP_STATUS=`curl --user $(USERPASS) --digest --silent --show-error \
+	@PKG_LINK=`cat $(DEV_SERVER_TMP_FILE) | grep -o "<a href=\"pkgs//[^\"]*\"" | sed "s|<a href=\"pkgs//||" | sed "s|\"||"`; \
+	HTTP_STATUS=`curl --user rokudev:$(ROKU_DEV_PASSWORD) --digest --silent --show-error \
 		--output $(APP_PKG_FILE) \
 		--write-out "%{http_code}" \
 		http://$(ROKU_DEV_TARGET)/pkgs/$$PKG_LINK`; \
-	$(CHECK_DEVICE_HTTP_STATUS)
-
-	@$(ECHO) "$(COLOR_DONE)*** Package $(APPNAME) complete ***$(COLOR_OFF)"
-
-# -------------------------------------------------------------------------
-# app-pkg: use to create a pkg file from the application sources.
-# Similar to the pkg target, but does not require a player to do the signing.
-# Instead it requires the developer key file and signing password to be
-# specified, which are then passed to the app-package desktop tool to create
-# the package file.
-#
-# Usage:
-# The application name should be specified via $APPNAME.
-# The application version should be specified via $VERSION.
-# The developer's key file (.pkg file) should be specified via $APP_KEY_FILE.
-# The developer's signing password (from genkey) should be passed via
-# $APP_KEY_PASS, or via stdin, otherwise the script will prompt for it.
-# -------------------------------------------------------------------------
-.PHONY: app-pkg
-app-pkg: $(APPNAME) check
-	@$(ECHO) "$(COLOR_START)*** Creating package ***$(COLOR_OFF)"
-
-	@$(ECHO) "  >> creating destination directory $(PKGREL)"
-	@mkdir -p $(PKGREL) && chmod 755 $(PKGREL)
-
-	@if [ -z "$(APP_KEY_FILE)" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: APP_KEY_FILE not defined$(COLOR_OFF)"; \
-		exit 1; \
-	fi
-	@if [ ! -f "$(APP_KEY_FILE)" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: key file not found: $(APP_KEY_FILE)$(COLOR_OFF)"; \
+	if [ "$$HTTP_STATUS" != "200" ]; then \
+		echo "$(COLOR_ERROR)ERROR: Device returned HTTP $$HTTP_STATUS$(COLOR_OFF)"; \
 		exit 1; \
 	fi
 
-	@if [ -z "$(APP_KEY_PASS)" ]; then \
-		read -r -p "Password: " REPLY; \
-		echo "$$REPLY" > $(APP_KEY_PASS_TMP); \
-	else \
-		echo "$(APP_KEY_PASS)" > $(APP_KEY_PASS_TMP); \
-	fi
+	@echo "*** Package $(APP_PKG_NAME) complete ***"
 
-	@$(ECHO) "Packaging $(APP_NAME)/$(APP_VERSION) to $(APP_PKG_FILE)"
+# Commenting this one for now.
+# If we really want it, we need to build in some error
+# 	control when there are no packages available so
+# 	curl doesn't explode
 
-	@if [ -z "$(APP_VERSION)" ]; then \
-		$(ECHO) "WARNING: VERSION is not set."; \
-	fi
+# get-pkg:
+# 	@echo "RETRIEVING $(APPNAME) on host $(ROKU_DEV_TARGET)"
 
-	@PASSWD=`cat $(APP_KEY_PASS_TMP)`; \
-	$(APP_PACKAGE_TOOL) package $(APP_ZIP_FILE) \
-		-n $(APP_NAME)/$(APP_VERSION) \
-		-k $(APP_KEY_FILE) \
-		-p "$$PASSWD" \
-		-o $(APP_PKG_FILE)
+# 	@if [ ! -d $(PKG_DIR) ]; \
+# 	then \
+# 		mkdir -p $(PKG_DIR); \
+# 	fi
 
-	@rm $(APP_KEY_PASS_TMP)
+# 	@if [ ! -w $(PKG_DIR) ]; \
+# 	then \
+# 		chmod 755 $(PKG_DIR); \
+# 	fi
 
-	@$(ECHO) "$(COLOR_DONE)*** Package $(APPNAME) complete ***$(COLOR_OFF)"
+# 	@if [ $(NO_AUTH) = 1 ]; \
+# 	then \
+# 		read -p "Password: " REPLY ; echo $$REPLY | xargs -i curl -s -S -Fmysubmit=Package -Fapp_name=$(APPNAME)/$(VERSION) -Fpasswd={} -Fpkg_time=`expr \`date +%s\` \* 1000` "http://$(ROKU_DEV_TARGET)/plugin_package" | grep 'href="pkgs' | sed 's/.*href=\"\([^\"]*\)\".*/\1/' | sed 's/pkgs\/\///' | xargs -i curl -s -S -o $(PKG_DIR)/$(APPNAME)_{} http://$(ROKU_DEV_TARGET)/pkgs/{}; \
+# 	else \
+# 		read -p "Password: " REPLY ; echo $$REPLY | xargs -i curl --user $(ROKU_DEV_USERNAME):$(ROKU_DEV_PASSWORD) --digest -s -S -Fmysubmit=Package -Fapp_name=$(APPNAME)/$(VERSION) -Fpasswd={} -Fpkg_time=`expr \`date +%s\` \* 1000` "http://$(ROKU_DEV_TARGET)/plugin_package" | grep 'href="pkgs' | sed 's/.*href=\"\([^\"]*\)\".*/\1/' | sed 's/pkgs\/\///' | xargs -i curl -s -S -o $(PKG_DIR)/$(APPNAME)_{} http://$(ROKU_DEV_TARGET)/pkgs/{}; \
+# 	fi
 
-# -------------------------------------------------------------------------
-# teamcity: used to build .zip and .pkg file on TeamCity.
-# See app-pkg target for info on options for specifying the signing password.
-# -------------------------------------------------------------------------
-.PHONY: teamcity
-teamcity: app-pkg
-ifeq ($(IS_TEAMCITY_BUILD),true)
-	@$(ECHO) "Adding TeamCity artifacts..."
+# 	@echo "Done getting $(APPNAME) from host $(ROKU_DEV_TARGET)"
 
-	sudo rm -rf /tmp/artifacts
-	sudo mkdir -p /tmp/artifacts
-
-	cp $(APP_ZIP_FILE) /tmp/artifacts/$(APP_NAME)-$(APP_VERSION).zip
-	@$(ECHO) "##teamcity[publishArtifacts '/tmp/artifacts/$(APP_NAME)-$(APP_VERSION).zip']"
-
-	cp $(APP_PKG_FILE) /tmp/artifacts/$(APP_NAME)-$(APP_VERSION).pkg
-	@$(ECHO) "##teamcity[publishArtifacts '/tmp/artifacts/$(APP_NAME)-$(APP_VERSION).pkg']"
-
-	@$(ECHO) "TeamCity artifacts complete."
-else
-	@$(ECHO) "Not running on TeamCity, skipping artifacts."
-endif
-
-##########################################################################
-
-# -------------------------------------------------------------------------
-# CHECK_NATIVE_TARGET is used to check if the Roku simulator is
-# configured.
-# -------------------------------------------------------------------------
-define CHECK_NATIVE_TARGET
-	if [ -z "$(ROKU_NATIVE_DEV)" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: ROKU_NATIVE_DEV not defined$(COLOR_OFF)"; \
-		exit 1; \
-	i
-	if [ ! -d "$(ROKU_NATIVE_DEV)" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: native dev dir not found: $(ROKU_NATIVE_DEV)$(COLOR_OFF)"; \
-		exit 1; \
-	fi
-	if [ ! -d "$(NATIVE_DIST_DIR)" ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: native build dir not found: $(NATIVE_DIST_DIR)$(COLOR_OFF)"; \
-		exit 1; \
-	fi
-endef
-
-# -------------------------------------------------------------------------
-# install-native: install the app as the dev channel on the Roku simulator.
-# -------------------------------------------------------------------------
-.PHONY: install-native
-install-native: $(APPNAME) check
-	@$(CHECK_NATIVE_TARGET)
-	@$(ECHO) "$(COLOR_START)Installing $(APPNAME) to native.$(COLOR_OFF)"
-	@if [ ! -d "$(NATIVE_DEV_REL)" ]; then \
-		mkdir "$(NATIVE_DEV_REL)"; \
-	fi
-	@$(ECHO) "Source is $(APP_ZIP_FILE)"
-	@$(ECHO) "Target is $(NATIVE_DEV_PKG)"
-	@cp $(APP_ZIP_FILE) $(NATIVE_DEV_PKG)
-	@$(NATIVE_TICKLER)
-
-# -------------------------------------------------------------------------
-# remove-native: uninstall the dev channel from the Roku simulator.
-# -------------------------------------------------------------------------
-.PHONY: remove-native
-remove-native:
-	@$(CHECK_NATIVE_TARGET)
-	@$(ECHO) "$(COLOR_START)Removing $(APPNAME) from native.$(COLOR_OFF)"
-	@rm $(NATIVE_DEV_PKG)
-	@$(NATIVE_TICKLER)
-
-##########################################################################
-
-# -------------------------------------------------------------------------
-# art-jpg-opt: compress any jpg files in the source tree.
-# Used by the art-opt target.
-# -------------------------------------------------------------------------
-APPS_JPG_ART=`\find . -name "*.jpg"`
-
-.PHONY: art-jpg-opt
-art-jpg-opt:
-	p4 edit $(APPS_JPG_ART)
-	for i in $(APPS_JPG_ART); \
-	do \
-		TMPJ=`mktemp` || return 1; \
-		$(ECHO) "optimizing $$i"; \
-		(jpegtran -copy none -optimize -outfile $$TMPJ $$i && mv -f $$TMPJ $$i &); \
-	done
-	wait
-	p4 revert -a $(APPS_JPG_ART)
-
-# -------------------------------------------------------------------------
-# art-png-opt: compress any png files in the source tree.
-# Used by the art-opt target.
-# -------------------------------------------------------------------------
-APPS_PNG_ART=`\find . -name "*.png"`
-
-.PHONY: art-png-opt
-art-png-opt:
-	p4 edit $(APPS_PNG_ART)
-	for i in $(APPS_PNG_ART); \
-	do \
-		(optipng -o7 $$i &); \
-	done
-	wait
-	p4 revert -a $(APPS_PNG_ART)
-
-# -------------------------------------------------------------------------
-# art-opt: compress any png and jpg files in the source tree using
-# lossless compression options.
-# This assumes a Perforce client/workspace is configured.
-# Modified files are opened for edit in the default changelist.
-# -------------------------------------------------------------------------
-.PHONY: art-opt
-art-opt: art-png-opt art-jpg-opt
-
-##########################################################################
-
-# -------------------------------------------------------------------------
-# tr: this target is used to update translation files for an application
-#
-# Preconditions: 'locale' subdirectory must be present
-# Also there must be a locale subdirectory for each desired locale to be output,
-# e.g. en_US, fr_CA, es_ES, de_DE, ...
-#
-# MAKE_TR_OPTIONS may be set to [-t] [-d] etc. in the external environment,
-# if needed.
-#
-# -n => don't add fake translation placeholders, e.g. 'esES: OK'.
-# Instead, leave the translation empty so it will only get used when
-# an actual translation is provided.
-# -------------------------------------------------------------------------
-MAKE_TR_OPTIONS ?= -n
-.PHONY: tr
-tr:
-	@if [ ! -d locale ]; then \
-		echo "Creating locale directory"; \
-		mkdir locale; \
-	fi
-	@if [ ! -d locale/en_US ]; then \
-		echo "Creating locale/en_US directory"; \
-		mkdir locale/en_US; \
-	fi
-ifneq ($(P4CLIENT),)
-	@-p4 edit locale/.../translations.xml > /dev/null 2>&1
-endif
-	@echo "========================================"
-	@$(MAKE_TR_TOOL) $(MAKE_TR_OPTIONS)
-	@echo "========================================"
-ifneq ($(P4CLIENT),)
-	@-p4 add locale/*/translations.xml > /dev/null 2>&1
-	@-p4 revert locale/en_US/translations.xml > /dev/null 2>&1
-	@-p4 revert -a locale/.../translations.xml > /dev/null 2>&1
-	@-p4 opened -c default
-endif
-
-##########################################################################
-
-# -------------------------------------------------------------------------
-# test: this target is used to run tests for an application
-# -------------------------------------------------------------------------
-.PHONY: test
-test: build addtests zip cleanup deploy runtests
-	@$(ECHO) "$(COLOR_DONE)*** running tests complete ***$(COLOR_OFF)"
-
-# -------------------------------------------------------------------------
-# addtests: add $(APP_TEST_DIR) content into $(APP_BUILD_DIR)
-# -------------------------------------------------------------------------
-.PHONY: addtests
 addtests:
-	@$(ECHO) "$(COLOR_START)*** Adding tests to $(APP_BUILD_DIR) ***$(COLOR_OFF)"
 
-	@if [ ! -d $(APP_TEST_DIR) ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: $(APP_TEST_DIR) does not exist$(COLOR_OFF)"; \
-		exit 1; \
-	fi
+	@echo ""
+	@echo ""
+	@echo ""
+	@echo "* - Before I can fill up this archive, I need"
+	@echo "    to have all the source code neatly in one place."
+	@echo "    So I'm copying all of that into the build"
+	@echo "    dir at $(BUILDDIR)";
+	@echo "--------------------------------------------------------"
+	@echo ""
 
-	mv $(APP_BUILD_DIR)/source/* $(APP_BUILD_DIR)/source
-	# rm -rf $(APP_BUILD_DIR)/src $(APP_BUILD_DIR)/components
-	cp -r $(APP_TEST_DIR)/$(TEST_SUITES) $(APP_BUILD_DIR)/source
-	cp $(APP_TEST_DIR)/source/brstest.brs $(APP_TEST_DIR)/source/Main.brs $(APP_BUILD_DIR)/source
-	cp $(APP_TEST_DIR)/manifest $(APP_BUILD_DIR)
+	cp -r $(TEST_LIBRARIES)/source $(BUILDDIR) 2>/dev/null || :
+	cp -r $(TEST_LIBRARIES)/manifest $(BUILDDIR) 2>/dev/null || :
+	cp -r $(TEST_SUITES) $(BUILDDIR)/source 2>/dev/null || :
+	@echo "... done."
 
-# -------------------------------------------------------------------------
-# runtests: run tests
-# -------------------------------------------------------------------------
-.PHONY: runtests
 runtests:
-	@$(ECHO) "$(COLOR_START)*** Running tests ***$(COLOR_OFF)"
 
 	@if [ ! -f $(TEST_RUNNER_SCRIPT) ]; then \
-		$(ECHO) "$(COLOR_ERROR)ERROR: $(TEST_RUNNER_SCRIPT) does not exist$(COLOR_OFF)"; \
+		echo "$(COLOR_ERROR)ERROR: $(TEST_RUNNER_SCRIPT) does not exist$(COLOR_OFF)"; \
 		exit 1; \
 	fi
 
 	@if [ -e "$(APP_TEST_RESULTS_FILE)" ]; then \
-		$(ECHO) "  >> removing old application test results file $(APP_TEST_RESULTS_FILE)"; \
+		echo "  >> removing old application test results file $(APP_TEST_RESULTS_FILE)"; \
 		rm $(APP_TEST_RESULTS_FILE); \
 	fi
 
-	@if [ ! -d $(TESTREL) ]; then \
-		$(ECHO) "  >> creating destination directory $(TESTREL)"; \
-		mkdir -p $(TESTREL); \
+	@if [ ! -d $(TST_DIR) ]; then \
+		echo "  >> creating destination directory $(TST_DIR)"; \
+		mkdir -p $(TST_DIR); \
 	fi
 
-	@if [ ! -w $(TESTREL) ]; then \
-		$(ECHO) "  >> setting directory permissions for $(TESTREL)"; \
-		chmod 755 $(TESTREL); \
+	@if [ ! -w $(TST_DIR) ]; then \
+		echo "  >> setting directory permissions for $(TST_DIR)"; \
+		chmod 755 $(TST_DIR); \
 	fi
 
 	curl -d "" http://$(ROKU_DEV_TARGET):8060/keypress/home
 	sleep 1
-	python -u $(TEST_RUNNER_SCRIPT) -v --ip $(ROKU_DEV_TARGET) --output $(APP_TEST_RESULTS_FILE)
 
-##########################################################################
+	python -u $(TEST_RUNNER_SCRIPT) --ip $(ROKU_DEV_TARGET) --output $(APP_TEST_RESULTS_FILE)
+
+remove:
+
+	@if [[ $(NO_AUTH) = 1 ]]; \
+	then \
+		echo "NOAUTH IS TRUE (remove)"; \
+	else \
+		echo "NOAUTH IS FALSE (remove)"; \
+	fi
+
+	@echo "Removing $(APPNAME) from host $(ROKU_DEV_TARGET)"
+
+	@if [ $(NO_AUTH) = 1 ]; \
+	then \
+		curl -s -S -F "mysubmit=Delete" -F "archive=" -F "passwd=" http://$(ROKU_DEV_TARGET)/plugin_install | grep "<font color" | sed "s/<font color=\"red\">//" | sed "s[</font>[["; \
+	else \
+		curl --user $(ROKU_DEV_USERNAME):$(ROKU_DEV_PASSWORD) --digest -s -S -F "mysubmit=Delete" -F "archive=" -F "passwd=" http://$(ROKU_DEV_TARGET)/plugin_install | grep "<font color" | sed "s/<font color=\"red\">//" | sed "s[</font>[["; \
+	fi
+
+clean:
+	@echo "Cleaning output directory..."
+	@if [ -d $(OUT_DIR) ]; \
+	then \
+		rm -rf $(OUT_DIR); \
+	fi
+
+	@echo "Cleaning build directory..."
+	@if [ -d $(BUILDDIR) ]; \
+	then \
+		rm -rf $(BUILDDIR); \
+	fi
+
+	@echo "Cleaning packages directory..."
+	@if [ -d $(PKG_DIR) ]; \
+	then \
+		rm -rf $(PKG_DIR); \
+	fi
+
+	@echo "Cleaning tests results directory..."
+	@if [ -d $(TST_DIR) ]; \
+	then \
+		rm -rf $(TST_DIR); \
+	fi
+
+	@echo "All done!"

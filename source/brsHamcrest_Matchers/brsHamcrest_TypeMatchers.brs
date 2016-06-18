@@ -214,3 +214,20 @@ function aNumber () as Object
 
     return matcher
 end function
+
+
+'Matcher to test the type is a String
+'
+'Example:
+'assertThat(foo, is(aString()))
+'
+'@return {Object<Matcher>} A Matcher to match on the String type
+function aString () as Object
+    matcher = BaseMatcher()
+
+    matcher.doMatch = function (target as Dynamic) as Boolean
+        return type(target) = "String" OR type(target) = "roString"
+    end function
+
+    return matcher
+end function

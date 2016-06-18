@@ -205,7 +205,7 @@ sub test_endsWithString_true (t as Object)
     testEndString = "String"
 
     'WHEN'
-    result = endsWithString(testStartString).doMatch(testTarget)
+    result = endsWithString(testEndString).doMatch(testTarget)
 
     'THEN'
     t.assertTrue(result)
@@ -222,7 +222,7 @@ sub test_endsWithString_false (t as Object)
     testEndString = "foo"
 
     'WHEN'
-    result = endsWithString(testStartString).doMatch(testTarget)
+    result = endsWithString(testEndString).doMatch(testTarget)
 
     'THEN'
     t.assertFalse(result)

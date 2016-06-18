@@ -11,7 +11,7 @@ You can use either `assertThat()` or `that()` to assert that a Matcher returns p
 ```brightscript
 assertThat(foo, is(aString()))
 assertThat(foo, startsWithString("bar"))
-assertThat(foo, is(allOf(aNumber(), greaterThan(5), lessThan(10))))
+assertThat(foo, is(allOf([aNumber(), greaterThan(5), lessThan(10)])))
 ```
 
 You may find that using `that()` fits better with an assertion from an existing test framework:
@@ -45,9 +45,9 @@ Included are various Matchers, such as:
 ' Examples are listed here, this is not a complete list.
 
 ' Type Matchers
-assertThat(10, is(anInteger))
-assertThat("foo", is(aString))
-assertThat(myFunc, is(aFunction))
+assertThat(10, is(anInteger()))
+assertThat("foo", is(aString()))
+assertThat(myFunc, is(aFunction()))
 
 ' Numeric Matchers
 assertThat(10, is(greaterThan(5)))
@@ -66,3 +66,6 @@ assertThat(myAssocArray, containsKeyValuePairs([{foo: "bar"}, {someKey: "someVal
 ```
 
 Feel free to create your own Matchers, just extend from `BaseMatcher` and ensure that the `doMatch()` function returns a `Boolean`.
+
+## Unit Tests
+brsHamcrest is fully unit tested. the `tests` directory contains the unit test source files and testrunner utility (using [brstestrunner](https://github.com/sky-uk/roku-brstestrunner)). To run the unit tests, execute `make test` from the project directory (where `Makefile` is located).

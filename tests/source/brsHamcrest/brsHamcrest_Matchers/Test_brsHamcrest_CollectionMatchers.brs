@@ -276,10 +276,10 @@ end sub
 'containsKeyValuePairs()
 sub test_containsKeyValuePairs_hasAllKeyValuePairs (t as Object)
     test = setup_brsHamcrest_CollectionMatchers()
-    
+
     'GIVEN'
-    testKeyValuePairArray = [{"foo0": "bar0"}, {"foo1": "bar1"}, {"foo2": "bar2"}]
-    testAssocArray = {foo: "bar0", foo1: "bar1", foo2: "bar2"}
+    testKeyValuePairArray = {foo0: "bar0", foo1: "bar1", foo2: "bar2"}
+    testAssocArray = {foo0: "bar0", foo1: "bar1", foo2: "bar2"}
 
     'WHEN'
     result = containsKeyValuePairs(testKeyValuePairArray).doMatch(testAssocArray)
@@ -293,10 +293,10 @@ end sub
 
 sub test_containsKeyValuePairs_hasSomeKeyValuePairs (t as Object)
     test = setup_brsHamcrest_CollectionMatchers()
-    
+
     'GIVEN'
-    testKeyValuePairArray = [{"foo0": "bar0"}, {"foo1": "bar1"}, {"foo2": "bar2"}]
-    testAssocArray = {foo: "bar0", foo1: "bar1"}
+    testKeyValuePairArray = {foo0: "bar0", foo1: "bar1", foo2: "bar2"}
+    testAssocArray = {foo0: "bar0", foo1: "bar1"}
 
     'WHEN'
     result = containsKeyValuePairs(testKeyValuePairArray).doMatch(testAssocArray)
@@ -310,9 +310,9 @@ end sub
 
 sub test_containsKeyValuePairs_hasNoKeyValuePairs (t as Object)
     test = setup_brsHamcrest_CollectionMatchers()
-    
+
     'GIVEN'
-    testKeyValuePairArray = [{"foo0": "bar0"}, {"foo1": "bar1"}, {"foo2": "bar2"}]
+    testKeyValuePairArray = {foo0: "bar0", foo1: "bar1", foo2: "bar2"}
     testAssocArray = {}
 
     'WHEN'
@@ -368,7 +368,7 @@ sub test_inCollection_assocArrayTrue (t as Object)
     testCollection = [{foo: "bar"}, {foo1: "bar1"}, {foo2: "bar2"}]
 
     'WHEN'
-    result = inCollection(testCollection).doMatch(testValue)
+    result = inCollection(testCollection).doMatch(testAssocArray)
 
     'THEN'
     t.assertTrue(result)
@@ -385,7 +385,7 @@ sub test_inCollection_assocArrayFalse (t as Object)
     testCollection = [{foo: "bar"}, {foo1: "bar1"}]
 
     'WHEN'
-    result = inCollection(testCollection).doMatch(testValue)
+    result = inCollection(testCollection).doMatch(testAssocArray)
 
     'THEN'
     t.assertFalse(result)

@@ -38,9 +38,11 @@ function containsStrings (arrayOfStrings as Object) as Object
 
     matcher.doMatch = function (target as String) as Boolean
         failure = false
-
-        for each s in stringArray
-            if (NOT containsString(target).doMatch(s)) then failure = true
+        for each s in m.stringArray
+            if (NOT containsString(s).doMatch(target))
+                failure = true
+                exit for
+            end if
         end for
 
         return (NOT failure)
@@ -57,7 +59,7 @@ end function
 '
 '@param value {Object<Array>} Array of Strings to find in order
 '@return {Object<Matcher>} A Matcher
-function containsStringsInOrder (arrayOfStrings as Object) as Boolean
+function containsStringsInOrder (arrayOfStrings as Object) as Object
     matcher = BaseMatcher()
 
     matcher.stringArray = arrayOfStrings
@@ -65,19 +67,19 @@ function containsStringsInOrder (arrayOfStrings as Object) as Boolean
     matcher.doMatch = function (target as String) as Boolean
         failure = false
 
-        lastPos = -1
+        lastPos = 0
 
         for each s in m.stringArray
-            pos = target.InStr(s)
-            if (pos > lastPos)
-                lastPos = pos
+            position = Instr(1, target, s)
+            if (position > lastPos)
+                lastPos = position
             else
                 failure = true
-                exit for
             end if
+            if failure then exit for
         end for
 
-        if (lastPos = -1) then failure = true
+        if (lastPos = 0) then failure = true
 
         return (NOT failure)
     end function
@@ -136,7 +138,7 @@ end function
 function anEmptyString () as Object
     matcher = BaseMatcher()
 
-    matcher.doMatch(target as String) as Boolean
+    matcher.doMatch = function (target as String) as Boolean
         return (target.Trim() = "")
     end function
 
