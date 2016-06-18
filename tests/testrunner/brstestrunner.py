@@ -251,7 +251,10 @@ def start_testing():
         sys.exit(1)
     else:
         TestrunnerUtils.pretty_print("Testing complete!", colour=TestrunnerUtils.TextDecorations.OK_BLUE)
-        sys.exit(0)
+        if num_of_passes == num_of_tests:
+            sys.exit(0)
+        else:
+            sys.exit(1)
 
 
 def print_welcome():
