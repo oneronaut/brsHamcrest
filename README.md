@@ -1,4 +1,4 @@
-# brsHamcrest
+# brsHamcrest [![Build Status](https://travis-ci.org/imbenjamin/brsHamcrest.svg?branch=master)](https://travis-ci.org/imbenjamin/brsHamcrest)
 Hamcrest implementation in BrightScript
 
 
