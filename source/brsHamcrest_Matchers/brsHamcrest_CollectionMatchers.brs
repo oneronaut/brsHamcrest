@@ -104,30 +104,26 @@ function inCollection (collection as Object) as Object
     matcher.collection = collection
 
     matcher.doMatch = function (target as Dynamic) as Boolean
-        match = false
         if (isEnumerable(m.collection))
             for each value in m.collection
                 if (isEnumerable(value))
                     if (inCollection(value).doMatch(target))
-                        match = true
-                        exit for
+                        return true
                     end if
                 else if (type(target) = "roAssociativeArray")
                     for each targetKey in target
                         if (targetKey = value AND target[targetKey] = m.collection[value])
-                            match = true
-                            exit for
+                            return true
                         end if
                     end for
                 else if (value = target)
-                    match = true
-                    exit for
+                    return true
                 end if
             end for
         else
             HamcrestError("Type Mismatch: Expected a Collection (implements ifEnum) and encountered a "+type(m.collection))
         end if
-        return match
+        return false
     end function
 
     return matcher
