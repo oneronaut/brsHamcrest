@@ -1,0 +1,34 @@
+{
+    "name": "brsHamcrest",
+    "homepage": "https://github.com/imbenjamin/brsHamcrest",
+    "authors": [
+        "Benjamin Hill <https://github.com/imbenjamin>"
+    ],
+    "description": "Hamcrest implementation in BrightScript",
+    "repository": {
+      "type": "git",
+      "url": "git://github.com/imbenjamin/brsHamcrest.git"
+    },
+    "moduleType": [
+        "globals"
+    ],
+    "ignore": [
+        "*",
+        "!source/",
+        "!source/*",
+        "!source/**/*"
+    ],
+    "keywords": [
+        "BrightScript",
+        "Roku",
+        "Hamcrest",
+        "Testing",
+        "Test",
+        "Xunit",
+        "TDD",
+        "Assertions",
+        "Matchers"
+    ],
+    "license": "MIT",
+    "private": false
+}
