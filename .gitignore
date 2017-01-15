@@ -4,8 +4,6 @@ out/
 
 # Created by https://www.gitignore.io/api/windo,windows,osx,sublimetext
 
-#!! ERROR: windo is undefined. Use list command to see defined gitignore types !!#
-
 ### Windows ###
 # Windows image file caches
 Thumbs.db
