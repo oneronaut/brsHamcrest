@@ -9,6 +9,7 @@ script: make remove && make test
 branches:
     only:
         - master
+        - develop
 
 notifications:
     email:
