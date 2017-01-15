@@ -1,7 +1,7 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
+
 
 ' SETUP / TEARDOWN
 
@@ -10,6 +10,7 @@
 '@return {Object} The test helper
 function setup_brsHamcrest_Matcher () as Object
     test = {
+        brsHamcrestOptions: HamcrestOptions()
         knownString: "foo"
     }
     return test
@@ -23,18 +24,19 @@ end function
 ' UNIT TESTS
 
 ' BaseMatcher()
-sub test_BaseMatcher_defaultTrue (t as Object)
+sub test_BaseMatcher_defaultFalse (t as Object)
     test = setup_brsHamcrest_Matcher()
 
     'GIVEN'
     testBaseMatcher = BaseMatcher()
     testTarget = test.knownString
+    test.brsHamcrestOptions.errors.suppressErrors = true
 
     'WHEN'
     result = testBaseMatcher.doMatch(testTarget)
 
     'THEN'
-    t.assertTrue(result)
+    t.assertFalse(result)
 
     teardown_brsHamcrest_Matcher()
 end sub

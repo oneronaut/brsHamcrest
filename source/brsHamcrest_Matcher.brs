@@ -1,7 +1,6 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
 
 
 'Base Matcher class that all Matchers should inherit from
@@ -16,7 +15,8 @@ function BaseMatcher () as Object
         '@param target {Dynamic} The thing to perform the match on
         '@return {Object<Matcher>} A Base Matcher class
         doMatch: function (target as Dynamic) as Boolean
-            return True
+            HamcrestError("Error: BaseMatcher doMatch() method has not been overridden.")
+            return False
         end function
     }
 

@@ -15,7 +15,7 @@ function anEmptyCollection () as Object
 
     matcher.doMatch = function (target as Dynamic) as Boolean
         failure = false
-        if (isEnumerable(target))
+        if (IsEnumerable(target))
             if (NOT target.IsEmpty()) then failure = true
         else
             HamcrestError("Type Mismatch: The target object is not an enumerable type.")
@@ -104,9 +104,9 @@ function inCollection (collection as Object) as Object
     matcher.collection = collection
 
     matcher.doMatch = function (target as Dynamic) as Boolean
-        if (isEnumerable(m.collection))
+        if (IsEnumerable(m.collection))
             for each value in m.collection
-                if (isEnumerable(value))
+                if (IsEnumerable(value))
                     if (inCollection(value).doMatch(target))
                         return true
                     end if
