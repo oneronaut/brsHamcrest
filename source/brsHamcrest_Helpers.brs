@@ -26,7 +26,7 @@ end function
 'Output an error message to the console, and cause a BrightScript STOP if option is set
 '
 '@param message {String} the error message to display
-'@return {String} the error message as it was output to the console. Returns Invalid if nothing was output.
+'@return {Dynamic} the error message as it was output to the console. Returns Invalid if nothing was output.
 function HamcrestError (message as String) as Dynamic
     output = Invalid
     if (NOT HamcrestOptions().errors.suppressErrors)
