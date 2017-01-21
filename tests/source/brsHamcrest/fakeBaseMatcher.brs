@@ -1,3 +1,11 @@
+' #################################################################
+' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
+' #################################################################
+
+
+'Mock BaseMatcher class, manually set willMatch for unit testing
+'
+'@return {Object} Mock BaseMatcher
 function FakeBaseMatcher () as Object
     fake = {
         CLASS_TYPE: "Matcher"

@@ -22,7 +22,8 @@ function HamcrestOptions () as Object
     return globalAA.brsHamcrestOptionsSingleton
 end function
 
-'Stop code execution and display an error message
+
+'Output an error message to the console, and cause a BrightScript STOP if option is set
 '
 '@param message {String} the error message to display
 '@return {String} the error message as it was output to the console. Returns Invalid if nothing was output.

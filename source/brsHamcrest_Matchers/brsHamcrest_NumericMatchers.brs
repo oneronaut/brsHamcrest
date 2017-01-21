@@ -1,7 +1,6 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
 
 
 'Matcher to test the given number is close to a value, within the given delta

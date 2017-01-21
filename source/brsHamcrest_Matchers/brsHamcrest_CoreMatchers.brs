@@ -1,7 +1,6 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
 
 
 'Decorates another Matcher, retaining its behaviour, but allowing tests to be slightly more expressive.

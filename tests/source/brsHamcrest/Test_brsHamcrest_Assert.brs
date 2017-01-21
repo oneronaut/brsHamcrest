@@ -1,7 +1,7 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
+
 
 ' SETUP / TEARDOWN
 
