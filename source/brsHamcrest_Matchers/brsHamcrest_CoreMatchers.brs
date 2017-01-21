@@ -50,23 +50,25 @@ end function
 function allOf (arrayOfMatchers as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.arrayOfMatchers = arrayOfMatchers
+    matcher.append({
+        arrayOfMatchers: arrayOfMatchers
 
-    matcher.doMatch = function (target as Dynamic)
-        failure = false
-        if (type(m.arrayOfMatchers) = "roArray")
-            for each matcherObj in m.arrayOfMatchers
-                if (matcherObj.CLASS_TYPE = "Matcher")
-                    failure = (NOT matcherObj.doMatch(target))
-                else
-                    HamcrestError("Type Mismatch: Expected a Matcher and encountered a "+type(matcherObj))
-                end if
-            end for
-        else
-            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
-        end if
-        return (NOT failure)
-    end function
+        doMatch: function (target as Dynamic)
+            failure = false
+            if (type(m.arrayOfMatchers) = "roArray")
+                for each matcherObj in m.arrayOfMatchers
+                    if (matcherObj.CLASS_TYPE = "Matcher")
+                        failure = (NOT matcherObj.doMatch(target))
+                    else
+                        HamcrestError("Type Mismatch: Expected a Matcher and encountered a "+type(matcherObj))
+                    end if
+                end for
+            else
+                HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
+            end if
+            return (NOT failure)
+        end function
+    })
 
     return matcher
 end function
@@ -82,21 +84,23 @@ end function
 function anyOf (arrayOfMatchers as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.arrayOfMatchers = arrayOfMatchers
+    matcher.append({
+        arrayOfMatchers: arrayOfMatchers
 
-    matcher.doMatch = function (target as Dynamic)
-        if (type(m.arrayOfMatchers) = "roArray")
-            for each matcherObj in m.arrayOfMatchers
-                if (matcherObj.doMatch(target))
-                    return true
-                end if
-            end for
-        else
-            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
-        end if
+        doMatch: function (target as Dynamic)
+            if (type(m.arrayOfMatchers) = "roArray")
+                for each matcherObj in m.arrayOfMatchers
+                    if (matcherObj.doMatch(target))
+                        return true
+                    end if
+                end for
+            else
+                HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
+            end if
 
-        return false
-    end function
+            return false
+        end function
+    })
 
     return matcher
 end function
@@ -112,21 +116,23 @@ end function
 function noneOf(arrayOfMatchers as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.arrayOfMatchers = arrayOfMatchers
+    matcher.append({
+        arrayOfMatchers: arrayOfMatchers
 
-    matcher.doMatch = function (target as Dynamic)
-        if (type(m.arrayOfMatchers) = "roArray")
-            for each matcherObj in m.arrayOfMatchers
-                if (matcherObj.doMatch(target))
-                    return false
-                end if
-            end for
-        else
-            HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
-        end if
+        doMatch: function (target as Dynamic)
+            if (type(m.arrayOfMatchers) = "roArray")
+                for each matcherObj in m.arrayOfMatchers
+                    if (matcherObj.doMatch(target))
+                        return false
+                    end if
+                end for
+            else
+                HamcrestError("Type Mismatch: Expected an Array and encountered a "+type(m.arrayOfMatchers))
+            end if
 
-        return true
-    end function
+            return true
+        end function
+    })
 
     return matcher
 end function
