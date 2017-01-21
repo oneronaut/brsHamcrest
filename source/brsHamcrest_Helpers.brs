@@ -1,29 +1,41 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
 
 
 'Access brsHamcrest's Options
 function HamcrestOptions () as Object
-    options = {
-        'Error handling
-        errors: {
-            silentErrors: false     'Suppress Error messages in the console
-            stopOnErrors: true      'Cause a BrightScript STOP on an Error
+    globalAA = GetGlobalAA()
+    if (globalAA.brsHamcrestOptionsSingleton = Invalid)
+        options = {
+            'Error handling
+            errors: {
+                suppressErrors: false     'Suppress Error messages in the console
+                stopOnErrors: true      'Cause a BrightScript STOP on an Error
+            }
+
+            'Test Mode
+            testMode: false
         }
-    }
-    return options
+        globalAA.brsHamcrestOptionsSingleton = options
+    end if
+    return globalAA.brsHamcrestOptionsSingleton
 end function
 
 'Stop code execution and display an error message
 '
 '@param message {String} the error message to display
-function HamcrestError (message as String) as Void
-    if (NOT HamcrestOptions().errors.silentErrors)
-        if (message <> Invalid) then print "[brsHamcrest] " + message
-        if (HamcrestOptions().errors.stopOnErrors) then stop
+'@return {String} the error message as it was output to the console. Returns Invalid if nothing was output.
+function HamcrestError (message as String) as Dynamic
+    output = Invalid
+    if (NOT HamcrestOptions().errors.suppressErrors)
+        output = "[brsHamcrest] " + message
+        if (NOT HamcrestOptions().testMode)
+            print output
+            if (HamcrestOptions().errors.stopOnErrors) then stop
+        end if
     end if
+    return output
 end function
 
 
@@ -40,6 +52,6 @@ end function
 'Determine if an Object is enumerable
 '
 '@param obj {Object} the Object to check for enumerability
-function isEnumerable (obj as Dynamic) as Boolean
+function IsEnumerable (obj as Dynamic) as Boolean
     return HasInterface(obj, "ifEnum")
 end function
