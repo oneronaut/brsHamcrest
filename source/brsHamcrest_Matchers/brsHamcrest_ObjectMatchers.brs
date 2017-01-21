@@ -16,15 +16,15 @@ function sameObjectAs (value as Object) as Object
     matcher.value = value
 
     matcher.doMatch = function (target as Dynamic) as Boolean
-        if (HasInterface(target, "ifAssociativeArray") AND HasInterface(value, "ifAssociativeArray"))
+        if (HasInterface(target, "ifAssociativeArray") AND HasInterface(m.value, "ifAssociativeArray"))
             result = False
             deviceInfo = CreateObject("roDeviceInfo")
             uuidKey = "brsHamcrestUUID"
             uuidValue = deviceInfo.GetRandomUUID()
             target.AddReplace(uuidKey, uuidValue)
-            if (value.Lookup(uuidKey) = uuidValue) then result = True
+            if (m.value.Lookup(uuidKey) = uuidValue) then result = True
             target.Delete(uuidKey)
-            value.Delete(uuidKey)
+            m.value.Delete(uuidKey)
             return result
         else
             HamcrestError("Type Mismatch: Both target and value must be object types (implement ifAssociativeArray).")

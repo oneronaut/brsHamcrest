@@ -34,6 +34,8 @@ sub test_sameObjectAs_sharedInstance (t as Object)
 
     'THEN'
     t.assertTrue(result)
+    t.assertEqual(testTarget.Keys().count(), 1)
+    t.assertEqual(testValue.Keys().count(), 1)
 
     teardown_brsHamcrest_ObjectMatchers()
 end sub
@@ -51,6 +53,8 @@ sub test_sameObjectAs_differentInstances (t as Object)
 
     'THEN'
     t.assertFalse(result)
+    t.assertEqual(testTarget.Keys().count(), 1)
+    t.assertEqual(testValue.Keys().count(), 1)
 
     teardown_brsHamcrest_ObjectMatchers()
 end sub
@@ -68,6 +72,7 @@ sub test_sameObjectAs_targetIsNotObject (t as Object)
 
     'THEN'
     t.assertFalse(result)
+    t.assertEqual(testValue.Keys().count(), 1)
 
     teardown_brsHamcrest_ObjectMatchers()
 end sub
@@ -85,6 +90,7 @@ sub test_sameObjectAs_valueIsNotObject (t as Object)
 
     'THEN'
     t.assertFalse(result)
+    t.assertEqual(testTarget.Keys().count(), 1)
 
     teardown_brsHamcrest_ObjectMatchers()
 end sub
