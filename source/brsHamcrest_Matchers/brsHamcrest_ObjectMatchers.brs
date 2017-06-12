@@ -53,7 +53,7 @@ function identicalTo (value as Object) as Object
 
         doMatch: function (target as Dynamic) as Boolean
             if (HasInterface(target, "ifAssociativeArray") AND HasInterface(m.value, "ifAssociativeArray"))
-                return coreDoMatch(target, value)
+                return coreDoMatch(target, m.value)
             else
                 HamcrestError("Type Mismatch: Both target and value must be object types (implement ifAssociativeArray).")
                 return False

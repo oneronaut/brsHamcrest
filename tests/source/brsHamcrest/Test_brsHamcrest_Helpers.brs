@@ -244,6 +244,34 @@ sub test_coreDoMatch_withDifferentDataTypes (t as Object)
 end sub
 
 
+sub test_coreDoMatch_withSameKeysDifferentValues (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownString: "knownString1"
+            knownInteger: 1
+            knownBoolean: true
+        }
+    end function
+
+    getDifferentFooObj = function () as Object
+        return {
+            knownString: "knownString2"
+            knownInteger: 2
+            knownBoolean: false
+        }
+    end function
+    'WHEN'
+    result = coreDoMatch(getFooObj(), getDifferentFooObj())
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
 sub test_coreDoMatch_withIdenticalAPI (t as Object)
     test = setup_brsHamcrest_Helpers
 
@@ -316,7 +344,7 @@ sub test_coreDoMatch_withIdenticalCollectionDataTypes (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withCollectionDataTypes (t as Object)
+sub test_coreDoMatch_withdifferentCollectionData (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
