@@ -13,6 +13,7 @@ function anEmptyCollection () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             failure = false
             if (IsEnumerable(target))

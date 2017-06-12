@@ -24,7 +24,7 @@ end function
 ' UNIT TESTS
 
 ' BaseMatcher()
-sub test_BaseMatcher_defaultFalse (t as Object)
+sub test_BaseMatcher_doMatchDefaultsToFalse (t as Object)
     test = setup_brsHamcrest_Matcher()
 
     'GIVEN'
@@ -34,6 +34,50 @@ sub test_BaseMatcher_defaultFalse (t as Object)
 
     'WHEN'
     result = testBaseMatcher.doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Matcher()
+end sub
+
+
+sub test_BaseMatcher_isSameMatch_identicalMatchers (t as Object)
+    test = setup_brsHamcrest_Matcher()
+
+    'GIVEN'
+    target = BaseMatcher()
+    comparison = BaseMatcher()
+
+    'WHEN'
+    result = target.isSameMatch(comparison)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_Matcher()
+end sub
+
+
+sub test_BaseMatcher_isSameMatch_differentMatchers (t as Object)
+    test = setup_brsHamcrest_Matcher()
+
+    'GIVEN'
+    target = BaseMatcher()
+    target.append({
+        foo: "foo"
+        two: 2
+        flag: true
+    })
+    comparison = BaseMatcher()
+    comparison.append({
+        foo: "foo"
+        two: 2
+        flag: false
+    })
+
+    'WHEN'
+    result = target.isSameMatch(comparison)
 
     'THEN'
     t.assertFalse(result)

@@ -146,6 +146,7 @@ function anEmptyString () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as String) as Boolean
             return (target.Trim() = "")
         end function

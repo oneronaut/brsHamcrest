@@ -56,3 +56,56 @@ end function
 function IsEnumerable (obj as Dynamic) as Boolean
     return HasInterface(obj, "ifEnum")
 end function
+
+
+'Compare two objects are identical in contents, but are not the same object.
+'
+'@param obj {Dynamic} the target to compare
+'@param obj {Dynamic} the comparison to compare against
+'@return {Boolean} true if the target and comparison are identical
+function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
+    targetType = type(target)
+    comparisonType = type(comparison)
+
+    if (targetType = comparisonType)
+
+        if (targetType = "roArray")
+            if (target.count() = comparison.count())
+                for i=0 to target.count()-1 Step 1
+                    if (coreDoMatch(target[i], comparison[i]) = false) return false
+                end for
+            else
+                return false
+            end if
+        else if (targetType = "roAssociativeArray")
+            targetItems = target.items()
+            comparisonItems = comparison.items()
+            targetItemCount = targetItems.Count()
+            if (targetItemCount = comparisonItems.Count())
+
+                for i=0 to targetItemCount-1 step 1
+                    if (targetItems[i].key <> comparisonItems[i].key)
+                        return false
+                    else
+                        if (coreDoMatch(targetItems[i].value, comparisonItems[i].value) = false) return false
+                    end if
+                end for
+            else
+                return false
+            end if
+
+        else if (targetType = "roBoolean" OR targetType = "roDouble" OR targetType = "roFloat" OR targetType = "roInteger" OR targetType = "roLongInteger" OR targetType = "roString")
+            return (target = comparison)
+
+        else if (targetType = "roFunction")
+            return (target.toStr() = comparison.toStr())
+
+        else
+            return (targetType = comparisonType)
+        end if
+    else
+        return false
+    end if
+
+    return true
+end function

@@ -36,3 +36,30 @@ function sameObjectAs (value as Object) as Object
 
     return matcher
 end function
+
+
+'Matcher to test that two object references are identically formed, even if they are not the same instance
+'
+'Example:
+'assertThat(foo, is(IdenticalTo(bar)))
+'
+'@param value {Object} The object to compare against
+'@return {Object<Matcher>} A Matcher
+function identicalTo (value as Object) as Object
+    matcher = BaseMatcher()
+
+    matcher.append({
+        value: value
+
+        doMatch: function (target as Dynamic) as Boolean
+            if (HasInterface(target, "ifAssociativeArray") AND HasInterface(m.value, "ifAssociativeArray"))
+                return coreDoMatch(target, m.value)
+            else
+                HamcrestError("Type Mismatch: Both target and value must be object types (implement ifAssociativeArray).")
+                return False
+            end if
+        end function
+    })
+
+    return matcher
+end function

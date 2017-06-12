@@ -190,3 +190,180 @@ sub test_IsEnumerable_false (t as Object)
 
     teardown_brsHamcrest_Helpers()
 end sub
+
+
+sub test_coreDoMatch_withIdenticalDataTypes (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownString: "knownStringParam"
+            knownInteger: 1
+            knownBoolean: true
+            knownFloat: 1/3
+            knownDouble: 2.3#
+            knownLongInteger: 987654321&
+        }
+    end function
+    'WHEN'
+    result = coreDoMatch(getFooObj(), getFooObj())
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_coreDoMatch_withDifferentDataTypes (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownString: "knownString"
+            knownInteger: 1
+            knownBoolean: true
+        }
+    end function
+
+    getDifferentFooObj = function () as Object
+        return {
+            knownString: "knownString"
+            differentString: "differentString"
+            knownInteger: 1
+            knownBoolean: true
+        }
+    end function
+    'WHEN'
+    result = coreDoMatch(getFooObj(), getDifferentFooObj())
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_coreDoMatch_withSameKeysDifferentValues (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownString: "knownString1"
+            knownInteger: 1
+            knownBoolean: true
+        }
+    end function
+
+    getDifferentFooObj = function () as Object
+        return {
+            knownString: "knownString2"
+            knownInteger: 2
+            knownBoolean: false
+        }
+    end function
+    'WHEN'
+    result = coreDoMatch(getFooObj(), getDifferentFooObj())
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_coreDoMatch_withIdenticalAPI (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownFunction1: function ()
+            end function
+            knownFunction2: function ()
+            end function
+            knownFunction3: function ()
+            end function
+        }
+    end function
+    'WHEN'
+    result = coreDoMatch(getFooObj(), getFooObj())
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_coreDoMatch_withDifferentAPI (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownFunction1: function ()
+            end function
+            knownFunction2: function ()
+            end function
+            knownFunction3: function ()
+            end function
+        }
+    end function
+    target = getFooObj()
+    comparison = getFooObj()
+    comparison.additionalFunction = function ()
+    end function
+    'WHEN'
+    result = coreDoMatch(target, comparison)
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_coreDoMatch_withIdenticalCollectionDataTypes (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownArray: ["foo", "bar"]
+            knownAssocArray: {
+                foo: "bar"
+                flag: true
+            }
+        }
+    end function
+    'WHEN'
+    result = coreDoMatch(getFooObj(), getFooObj())
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_coreDoMatch_withdifferentCollectionData (t as Object)
+    test = setup_brsHamcrest_Helpers
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            knownArray: ["foo", "bar"]
+            knownAssocArray: {
+                foo: "bar"
+                flag: true
+            }
+        }
+    end function
+    target = getFooObj()
+    comparison = getFooObj()
+    comparison.knownArray = ["foo", "bar", "two"]
+    'WHEN'
+    result = coreDoMatch(target, comparison)
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub

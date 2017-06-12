@@ -13,6 +13,7 @@ function aArray () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "roArray"
         end function
@@ -42,6 +43,7 @@ function aAssociativeArray () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "roAssociativeArray"
         end function
@@ -72,6 +74,7 @@ function aBoolean () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "Boolean" OR type(target) = "roBoolean"
         end function
@@ -90,6 +93,7 @@ function aDouble () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "Double" OR type(target) = "roIntrinsicDouble" OR type(target) = "roDouble"
         end function
@@ -109,6 +113,7 @@ function aFloat () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "Float" OR type(target) = "roFloat"
         end function
@@ -128,6 +133,7 @@ function aFunction () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "Function" OR type(target) = "roFunction"
         end function
@@ -147,6 +153,7 @@ function aInteger () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "Integer" OR type(target) = "roInteger" OR type(target) = "roInt"
         end function
@@ -177,6 +184,7 @@ function aInvalid () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "Invalid" OR type(target) = "roInvalid"
         end function
@@ -207,6 +215,7 @@ function aLongInteger () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "LongInteger" OR type(target) = "roLongInteger"
         end function
@@ -226,6 +235,7 @@ function aNumber () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return (aFloat().doMatch(target) OR aDouble().doMatch(target) OR aInteger().doMatch(target) OR aLongInteger().doMatch(target))
         end function
@@ -245,6 +255,7 @@ function aString () as Object
     matcher = BaseMatcher()
 
     matcher.append({
+
         doMatch: function (target as Dynamic) as Boolean
             return type(target) = "String" OR type(target) = "roString"
         end function
