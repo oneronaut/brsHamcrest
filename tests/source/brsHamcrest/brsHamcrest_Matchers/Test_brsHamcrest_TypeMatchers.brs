@@ -35,6 +35,7 @@ function setup_brsHamcrest_TypeMatchers () as Object
     test.knownRoInvalid = CreateObject("roInvalid")
     test.knownRoLongInteger = CreateObject("roLongInteger")
     test.knownRoString = CreateObject("roString")
+    test.knownRoDateTime = CreateObject("roDateTime")
 
     return test
 end function
@@ -77,6 +78,7 @@ sub test_aArray (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -113,6 +115,7 @@ sub test_aAssociativeArray (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -149,6 +152,7 @@ sub test_aBoolean (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -185,6 +189,7 @@ sub test_aDouble (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -221,6 +226,7 @@ sub test_aFloat (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -257,6 +263,7 @@ sub test_aFunction (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -293,6 +300,7 @@ sub test_aInteger (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -329,6 +337,7 @@ sub test_aInvalid (t as Object)
     t.assertTrue(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -365,6 +374,7 @@ sub test_aLongInteger (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertTrue(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -401,6 +411,7 @@ sub test_aNumber (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertTrue(doAssert(test.knownRoLongInteger))
     t.assertFalse(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub
@@ -437,6 +448,44 @@ sub test_aString (t as Object)
     t.assertFalse(doAssert(test.knownRoInvalid))
     t.assertFalse(doAssert(test.knownRoLongInteger))
     t.assertTrue(doAssert(test.knownRoString))
+    t.assertFalse(doAssert(test.knownRoDateTime))
+
+    teardown_brsHamcrest_TypeMatchers()
+end sub
+
+
+' typeOf()
+sub test_typeOf (t as Object)
+    test = setup_brsHamcrest_TypeMatchers()
+
+    'GIVEN'
+    doAssert = function (typeString as String, testValue as Dynamic) as Boolean
+        return (typeOf(typeString).doMatch(testValue))
+    end function
+
+    'WHEN'
+
+    'THEN'
+    t.assertTrue(doAssert("roBoolean", test.knownBoolean))
+    t.assertTrue(doAssert("Double", 42#))
+    t.assertTrue(doAssert("roFloat", test.knownFloat))
+    t.assertTrue(doAssert("roFunction", test.knownFunction))
+    t.assertTrue(doAssert("roInteger", test.knownInteger))
+    t.assertTrue(doAssert("Invalid", test.knownInvalid))
+    t.assertTrue(doAssert("LongInteger", test.knownLongInteger))
+    t.assertTrue(doAssert("roString", test.knownString))
+
+    t.assertTrue(doAssert("roArray", test.knownRoArray))
+    t.assertTrue(doAssert("roAssociativeArray", test.knownRoAssociativeArray))
+    t.assertTrue(doAssert("roBoolean", test.knownRoBoolean))
+    t.assertTrue(doAssert("roDouble", test.knownRoDouble))
+    t.assertTrue(doAssert("roFloat", test.knownRoFloat))
+    t.assertTrue(doAssert("roFunction", test.knownRoFunction))
+    t.assertTrue(doAssert("roInt", test.knownRoInt))
+    t.assertTrue(doAssert("roInvalid", test.knownRoInvalid))
+    t.assertTrue(doAssert("LongInteger", test.knownRoLongInteger))
+    t.assertTrue(doAssert("roString", test.knownRoString))
+    t.assertTrue(doAssert("roDateTime", test.knownRoDateTime))
 
     teardown_brsHamcrest_TypeMatchers()
 end sub

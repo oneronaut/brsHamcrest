@@ -252,3 +252,25 @@ function aString () as Object
 
     return matcher
 end function
+
+
+'Matcher to test the type of any non-intrinsic object type
+'
+'Example:
+'assertThat(foo, is(typeOf("roDateTime")))
+'
+'@param typeString {String} The type to check against
+'@return {Object<Matcher>} A Matcher to match on the String type
+function typeOf (typeString as String) as Object
+    matcher = BaseMatcher()
+
+    matcher.append({
+        typeString: typeString
+
+        doMatch: function (target as Dynamic) as Boolean
+            return type(target) = m.typeString
+        end function
+    })
+
+    return matcher
+end function
