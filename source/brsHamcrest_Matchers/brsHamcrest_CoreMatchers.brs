@@ -4,25 +4,32 @@
 
 
 'Decorates another Matcher, retaining its behaviour, but allowing tests to be slightly more expressive.
+'If passed an array, then is() acts as a shortcut to allOf()
 '
 'Example:
 'assertThat(foo, is(aString()))
+'assertThat(foo, is([aString(), endsWithString("bar")]))
 '
 '@param matcher {Object<Matcher>} A Matcher
 '@return {Object<Matcher>} A Matcher
 function is (matcher as Object) as Object
+    if type(matcher) = "roArray" then return allOf(matcher)
     return matcher
 end function
 
 
 'Creates a matcher that wraps an existing matcher, but inverts the logic by which it will match.
+'If passed an array, isNot() acts as a shortcut to noneOf()
 '
 'Example:
 'assertThat(foo, isNot(aString()))
+'assertThat(foo, isNot([aString(), aNumber()]))
 '
 '@param matcher {Object<Matcher>} A Matcher
 '@return {Object<Matcher>} A Matcher
 function isNot (matcher as Object) as Object
+    if type(matcher) = "roArray" then return noneOf(matcher)
+
     retVal = Invalid
     if (matcher.CLASS_TYPE = "Matcher")
         newMatcher = matcher
