@@ -111,3 +111,55 @@ sub test_sameObjectAs_targetAndValueAreNotObjects (t as Object)
 
     teardown_brsHamcrest_ObjectMatchers()
 end sub
+
+
+' identicalTo()
+sub test_identicalTo_targetAndValueAreNotObjects (t as Object)
+    test = setup_brsHamcrest_ObjectMatchers()
+
+    'GIVEN'
+    testTarget = 123
+    testValue = "foo"
+
+    'WHEN'
+    result = identicalTo(testValue).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_ObjectMatchers()
+end sub
+
+
+sub test_identicalTo_targetAndValueAreIdenticalObjects (t as Object)
+    test = setup_brsHamcrest_ObjectMatchers()
+
+    'GIVEN'
+    testTarget = {foo: "bar", two: 2, flag: true}
+    testValue = {foo: "bar", two: 2, flag: true}
+
+    'WHEN'
+    result = identicalTo(testValue).doMatch(testTarget)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_ObjectMatchers()
+end sub
+
+
+sub test_identicalTo_targetAndValueAreNOTIdenticalObjects (t as Object)
+    test = setup_brsHamcrest_ObjectMatchers()
+
+    'GIVEN'
+    testTarget = {foo: "bar", two: 2, flag: true}
+    testValue = {foo: "bar", two: 2, flag: false}
+
+    'WHEN'
+    result = identicalTo(testValue).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_ObjectMatchers()
+end sub
