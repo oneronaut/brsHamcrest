@@ -60,10 +60,10 @@ end function
 
 'Compare two objects are identical in contents, but are not the same object.
 '
-'@param obj {Dynamic} the target to compare
-'@param obj {Dynamic} the comparison to compare against
+'@param target {Dynamic} the target to compare
+'@param comparison {Dynamic} the comparison to compare against
 '@return {Boolean} true if the target and comparison are identical
-function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
+function CoreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
     targetType = type(target)
     comparisonType = type(comparison)
 
@@ -72,7 +72,7 @@ function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
         if (targetType = "roArray")
             if (target.count() = comparison.count())
                 for i=0 to target.count()-1 Step 1
-                    if (coreDoMatch(target[i], comparison[i]) = false) return false
+                    if (CoreDoMatch(target[i], comparison[i]) = false) return false
                 end for
             else
                 return false
@@ -87,7 +87,7 @@ function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
                     if (targetItems[i].key <> comparisonItems[i].key)
                         return false
                     else
-                        if (coreDoMatch(targetItems[i].value, comparisonItems[i].value) = false) return false
+                        if (CoreDoMatch(targetItems[i].value, comparisonItems[i].value) = false) return false
                     end if
                 end for
             else
@@ -108,4 +108,20 @@ function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
     end if
 
     return true
+end function
+
+'Validate that a given object as a Matcher
+'
+'@param obj {Dynamic} the object to validate
+function IsMatcher (obj as Dynamic) as Boolean
+    if (type(obj) = "roAssociativeArray")
+        'Ensure the BaseMatcher methods are present
+        knownBaseMatcher = BaseMatcher()
+        for each func in knownBaseMatcher.Keys()
+            if (NOT obj.DoesExist(func)) then return false
+        end for
+        return true
+    else
+        return false
+    end if
 end function

@@ -192,7 +192,8 @@ sub test_IsEnumerable_false (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withIdenticalDataTypes (t as Object)
+' CoreDoMatch()
+sub test_CoreDoMatch_withIdenticalDataTypes (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
@@ -207,7 +208,7 @@ sub test_coreDoMatch_withIdenticalDataTypes (t as Object)
         }
     end function
     'WHEN'
-    result = coreDoMatch(getFooObj(), getFooObj())
+    result = CoreDoMatch(getFooObj(), getFooObj())
     'THEN'
     t.assertTrue(result)
 
@@ -215,7 +216,7 @@ sub test_coreDoMatch_withIdenticalDataTypes (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withDifferentDataTypes (t as Object)
+sub test_CoreDoMatch_withDifferentDataTypes (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
@@ -236,7 +237,7 @@ sub test_coreDoMatch_withDifferentDataTypes (t as Object)
         }
     end function
     'WHEN'
-    result = coreDoMatch(getFooObj(), getDifferentFooObj())
+    result = CoreDoMatch(getFooObj(), getDifferentFooObj())
     'THEN'
     t.assertFalse(result)
 
@@ -244,7 +245,7 @@ sub test_coreDoMatch_withDifferentDataTypes (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withSameKeysDifferentValues (t as Object)
+sub test_CoreDoMatch_withSameKeysDifferentValues (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
@@ -264,7 +265,7 @@ sub test_coreDoMatch_withSameKeysDifferentValues (t as Object)
         }
     end function
     'WHEN'
-    result = coreDoMatch(getFooObj(), getDifferentFooObj())
+    result = CoreDoMatch(getFooObj(), getDifferentFooObj())
     'THEN'
     t.assertFalse(result)
 
@@ -272,7 +273,7 @@ sub test_coreDoMatch_withSameKeysDifferentValues (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withIdenticalAPI (t as Object)
+sub test_CoreDoMatch_withIdenticalAPI (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
@@ -287,7 +288,7 @@ sub test_coreDoMatch_withIdenticalAPI (t as Object)
         }
     end function
     'WHEN'
-    result = coreDoMatch(getFooObj(), getFooObj())
+    result = CoreDoMatch(getFooObj(), getFooObj())
     'THEN'
     t.assertTrue(result)
 
@@ -295,7 +296,7 @@ sub test_coreDoMatch_withIdenticalAPI (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withDifferentAPI (t as Object)
+sub test_CoreDoMatch_withDifferentAPI (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
@@ -314,7 +315,7 @@ sub test_coreDoMatch_withDifferentAPI (t as Object)
     comparison.additionalFunction = function ()
     end function
     'WHEN'
-    result = coreDoMatch(target, comparison)
+    result = CoreDoMatch(target, comparison)
     'THEN'
     t.assertFalse(result)
 
@@ -322,7 +323,7 @@ sub test_coreDoMatch_withDifferentAPI (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withIdenticalCollectionDataTypes (t as Object)
+sub test_CoreDoMatch_withIdenticalCollectionDataTypes (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
@@ -336,7 +337,7 @@ sub test_coreDoMatch_withIdenticalCollectionDataTypes (t as Object)
         }
     end function
     'WHEN'
-    result = coreDoMatch(getFooObj(), getFooObj())
+    result = CoreDoMatch(getFooObj(), getFooObj())
     'THEN'
     t.assertTrue(result)
 
@@ -344,7 +345,7 @@ sub test_coreDoMatch_withIdenticalCollectionDataTypes (t as Object)
 end sub
 
 
-sub test_coreDoMatch_withdifferentCollectionData (t as Object)
+sub test_CoreDoMatch_withdifferentCollectionData (t as Object)
     test = setup_brsHamcrest_Helpers
 
     'GIVEN'
@@ -361,7 +362,61 @@ sub test_coreDoMatch_withdifferentCollectionData (t as Object)
     comparison = getFooObj()
     comparison.knownArray = ["foo", "bar", "two"]
     'WHEN'
-    result = coreDoMatch(target, comparison)
+    result = CoreDoMatch(target, comparison)
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+'IsMatcher
+sub test_IsMatcher_AllCorrectMethods (t as Object)
+    test = setup_brsHamcrest_Helpers()
+
+    'GIVEN'
+    targetObj = BaseMatcher()
+
+    'WHEN'
+    result = IsMatcher(targetObj)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_IsMatcher_SomeCorrectMethods (t as Object)
+    test = setup_brsHamcrest_Helpers()
+
+    'GIVEN'
+    targetObj = BaseMatcher()
+    targetObj.Delete(targetObj.Keys()[0])
+
+    'WHEN'
+    result = IsMatcher(targetObj)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_IsMatcher_NoCorrectMethods (t as Object)
+
+    test = setup_brsHamcrest_Helpers()
+
+    'GIVEN'
+    targetObj = {
+        foo: function () as Void
+        end function
+    }
+
+    'WHEN'
+    result = IsMatcher(targetObj)
+
     'THEN'
     t.assertFalse(result)
 
