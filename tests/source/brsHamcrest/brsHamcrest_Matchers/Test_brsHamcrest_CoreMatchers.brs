@@ -213,7 +213,7 @@ end sub
 
 
 'isAnything()
-sub test_isAnything_noParameter (t as Object)
+sub test_isAnything (t as Object)
     setup_brsHamcrest_CoreMatchers()
 
     'GIVEN'
@@ -221,23 +221,6 @@ sub test_isAnything_noParameter (t as Object)
 
     'WHEN'
     result = isAnything().doMatch(knownTarget)
-
-    'THEN'
-    t.assertTrue(result)
-
-    teardown_brsHamcrest_CoreMatchers()
-end sub
-
-
-sub test_isAnything_withParameter (t as Object)
-    setup_brsHamcrest_CoreMatchers()
-
-    'GIVEN'
-    knownTarget = {}
-    knownParameter = "foo"
-
-    'WHEN'
-    result = isAnything(knownParameter).doMatch(knownTarget)
 
     'THEN'
     t.assertTrue(result)

@@ -19,13 +19,12 @@ end function
 
 
 'A matcher that has the correct structure, but returns true to anything, for the purposes of integration with frameworks
-'Is capable of handling an optional parameter
 '
 'Example:
 'assertThat(foo, isAnything())
 '
 '@return {Object<Matcher>} A Matcher
-function isAnything (optionalValue="" as Dynamic) as Object
+function isAnything () as Object
     matcher = BaseMatcher()
 
     matcher.append({
