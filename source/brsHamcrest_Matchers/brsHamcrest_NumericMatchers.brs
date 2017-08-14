@@ -19,7 +19,11 @@ function closeTo (value as Float, delta as Float) as Object
         delta: delta
 
         doMatch: function (target as Dynamic) as Boolean
-            return (target >= m.value - m.delta AND target <= m.value + m.delta)
+            if assertThat(target, is(aNumber()))
+                return (target >= m.value - m.delta AND target <= m.value + m.delta)
+            else
+                return false
+            end if
         end function
     })
 
@@ -41,7 +45,11 @@ function greaterThan (value as Float) as Object
         value: value
 
         doMatch: function (target as Dynamic) as Boolean
-            return (target > m.value)
+            if assertThat(target, is(aNumber()))
+                return (target > m.value)
+            else
+                return false
+            end if
         end function
     })
 
@@ -63,7 +71,11 @@ function greaterThanOrEqualTo (value as Float) as Object
         value: value
 
         doMatch: function (target as Dynamic) as Boolean
-            return (target >= m.value)
+            if assertThat(target, is(aNumber()))
+                return (target >= m.value)
+            else
+                return false
+            end if
         end function
     })
 
@@ -85,7 +97,11 @@ function lessThan (value as Float) as Object
         value: value
 
         doMatch: function (target as Dynamic) as Boolean
-            return (target < m.value)
+            if assertThat(target, is(aNumber()))
+                return (target < m.value)
+            else
+                return false
+            end if
         end function
     })
 
@@ -107,7 +123,11 @@ function lessThanOrEqualTo (value as Float) as Object
         value: value
 
         doMatch: function (target as Dynamic) as Boolean
-            return (target <= m.value)
+            if assertThat(target, is(aNumber()))
+                return (target <= m.value)
+            else
+                return false
+            end if
         end function
     })
 

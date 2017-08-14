@@ -19,7 +19,7 @@ function anEmptyCollection () as Object
             if (IsEnumerable(target))
                 if (NOT target.IsEmpty()) then failure = true
             else
-                HamcrestError("Type Mismatch: The target object is not an enumerable type.")
+                failure = true
             end if
             return (NOT failure)
         end function
@@ -51,13 +51,13 @@ function containsKeys (keyArray as Object) as Object
                             if (target[key] = Invalid) then failure = true
                         end for
                     else
-                        HamcrestError("Type Mismatch: Expected an enumerable type and encountered a "+type(target))
+                        failure = true
                     end if
                 else
                     failure = true
                 end if
             else
-                HamcrestError("Type Mismatch: Expected a roArray and encountered a "+type(m.keyArray))
+                failure = true
             end if
             return (NOT failure)
         end function
@@ -87,7 +87,7 @@ function containsKeyValuePairs (keyValuePairs as Object) as Object
                     if (target[key] = Invalid OR (target[key] <> Invalid AND target[key] <> m.keyValuePairs[key])) then failure = true
                 end for
             else
-                HamcrestError("Type Mismatch: Expected an Associative Array and encountered a "+type(target))
+                failure = true
             end if
             return (NOT failure)
         end function

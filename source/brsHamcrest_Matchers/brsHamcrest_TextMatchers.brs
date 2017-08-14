@@ -16,8 +16,12 @@ function containsString (value as String) as Object
     matcher.append({
         value: value
 
-        doMatch: function (target as String) as Boolean
-            return (target.Instr(m.value) <> -1)
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.Instr(m.value) <> -1)
+            else
+                return false
+            end if
         end function
     })
 
@@ -38,14 +42,18 @@ function containsStrings (arrayOfStrings as Object) as Object
     matcher.append({
         stringArray: arrayOfStrings
 
-        doMatch: function (target as String) as Boolean
-            for each s in m.stringArray
-                if (NOT containsString(s).doMatch(target))
-                    return false
-                end if
-            end for
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                for each s in m.stringArray
+                    if (NOT containsString(s).doMatch(target))
+                        return false
+                    end if
+                end for
 
-            return true
+                return true
+            else
+                return false
+            end if
         end function
     })
 
@@ -66,24 +74,26 @@ function containsStringsInOrder (arrayOfStrings as Object) as Object
     matcher.append({
         stringArray: arrayOfStrings
 
-        doMatch: function (target as String) as Boolean
-            failure = false
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                failure = false
+                lastPos = 0
+                for each s in m.stringArray
+                    position = Instr(1, target, s)
+                    if (position > lastPos)
+                        lastPos = position
+                    else
+                        failure = true
+                    end if
+                    if failure then exit for
+                end for
 
-            lastPos = 0
+                if (lastPos = 0) then failure = true
 
-            for each s in m.stringArray
-                position = Instr(1, target, s)
-                if (position > lastPos)
-                    lastPos = position
-                else
-                    failure = true
-                end if
-                if failure then exit for
-            end for
-
-            if (lastPos = 0) then failure = true
-
-            return (NOT failure)
+                return (NOT failure)
+            else
+                return false
+            end if
         end function
     })
 
@@ -104,8 +114,12 @@ function startsWithString (value as String) as Object
     matcher.append({
         beginStr: value
 
-        doMatch: function (target as String) as Boolean
-            return (target.InStr(m.beginStr) = 0)
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.InStr(m.beginStr) = 0)
+            else
+                return false
+            end if
         end function
     })
 
@@ -126,8 +140,12 @@ function endsWithString (value as String) as Object
     matcher.append({
         endStr: value
 
-        doMatch: function (target as String) as Boolean
-            return (target.Right(m.endStr.Len()) = m.endStr)
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.Right(m.endStr.Len()) = m.endStr)
+            else
+                return false
+            end if
         end function
     })
 
@@ -147,8 +165,12 @@ function anEmptyString () as Object
 
     matcher.append({
 
-        doMatch: function (target as String) as Boolean
-            return (target.Trim() = "")
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.Trim() = "")
+            else
+                return false
+            end if
         end function
     })
 
