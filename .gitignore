@@ -69,3 +69,6 @@ Temporary Items
 
 # sftp configuration file
 sftp-config.json
+tests/testrunner/utils/__init__.pyc
+tests/testrunner/utils/RokuUtils.pyc
+tests/testrunner/utils/TestrunnerUtils.pyc

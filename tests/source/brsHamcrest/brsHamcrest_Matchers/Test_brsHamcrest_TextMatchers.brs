@@ -57,6 +57,23 @@ sub test_containsString_false (t as Object)
 end sub
 
 
+sub test_containsString_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_TextMatchers()
+
+    'GIVEN'
+    testTarget = false
+    testToMatch = "foo"
+
+    'WHEN'
+    result = containsString(testToMatch).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_TextMatchers()
+end sub
+
+
 'containsStrings()
 sub test_containsStrings_allStringsPresent (t as Object)
     test = setup_brsHamcrest_TextMatchers()
@@ -97,6 +114,23 @@ sub test_containsStrings_noStringsPresent (t as Object)
 
     'GIVEN'
     testTarget = test.knownString
+    testStringsArray = ["foo", "bar"]
+
+    'WHEN'
+    result = containsStrings(testStringsArray).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_TextMatchers()
+end sub
+
+
+sub test_containsStrings_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_TextMatchers()
+
+    'GIVEN'
+    testTarget = false
     testStringsArray = ["foo", "bar"]
 
     'WHEN'
@@ -161,6 +195,23 @@ sub test_containsStringsInOrder_allStringsIncorrectOrder (t as Object)
 end sub
 
 
+sub test_containsStringsInOrder_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_TextMatchers()
+
+    'GIVEN'
+    testTarget = false
+    testStringsArray = ["kno", "wnS", "ng", "tri"]
+
+    'WHEN'
+    result = containsStringsInOrder(testStringsArray).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_TextMatchers()
+end sub
+
+
 'startsWithString()
 sub test_startsWithString_true (t as Object)
     test = setup_brsHamcrest_TextMatchers()
@@ -196,6 +247,23 @@ sub test_startsWithString_false (t as Object)
 end sub
 
 
+sub test_startsWithString_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_TextMatchers()
+
+    'GIVEN'
+    testTarget = false
+    testStartString = "foo"
+
+    'WHEN'
+    result = startsWithString(testStartString).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_TextMatchers()
+end sub
+
+
 'endsWithString()
 sub test_endsWithString_true (t as Object)
     test = setup_brsHamcrest_TextMatchers()
@@ -219,6 +287,23 @@ sub test_endsWithString_false (t as Object)
 
     'GIVEN'
     testTarget = test.knownString
+    testEndString = "foo"
+
+    'WHEN'
+    result = endsWithString(testEndString).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_TextMatchers()
+end sub
+
+
+sub test_endsWithString_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_TextMatchers()
+
+    'GIVEN'
+    testTarget = false
     testEndString = "foo"
 
     'WHEN'
@@ -269,6 +354,22 @@ sub test_anEmptyString_false (t as Object)
 
     'GIVEN'
     testString = test.knownString
+
+    'WHEN'
+    result = anEmptyString().doMatch(testString)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_TextMatchers()
+end sub
+
+
+sub test_anEmptyString_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_TextMatchers()
+
+    'GIVEN'
+    testString = false
 
     'WHEN'
     result = anEmptyString().doMatch(testString)

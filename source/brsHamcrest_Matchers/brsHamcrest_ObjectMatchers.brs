@@ -28,7 +28,6 @@ function sameObjectAs (value as Object) as Object
                 m.value.Delete(uuidKey)
                 return result
             else
-                HamcrestError("Type Mismatch: Both target and value must be object types (implement ifAssociativeArray).")
                 return False
             end if
         end function
@@ -55,7 +54,6 @@ function identicalTo (value as Object) as Object
             if (HasInterface(target, "ifAssociativeArray") AND HasInterface(m.value, "ifAssociativeArray"))
                 return coreDoMatch(target, m.value)
             else
-                HamcrestError("Type Mismatch: Both target and value must be object types (implement ifAssociativeArray).")
                 return False
             end if
         end function

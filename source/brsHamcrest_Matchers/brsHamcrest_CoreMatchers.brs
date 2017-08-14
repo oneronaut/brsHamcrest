@@ -60,7 +60,7 @@ function allOf (arrayOfMatchers as Object) as Object
     matcher.append({
         arrayOfMatchers: arrayOfMatchers
 
-        doMatch: function (target as Dynamic)
+        doMatch: function (target as Dynamic) as Boolean
             failure = false
             if (type(m.arrayOfMatchers) = "roArray")
                 for each matcherObj in m.arrayOfMatchers
@@ -94,7 +94,7 @@ function anyOf (arrayOfMatchers as Object) as Object
     matcher.append({
         arrayOfMatchers: arrayOfMatchers
 
-        doMatch: function (target as Dynamic)
+        doMatch: function (target as Dynamic) as Boolean
             if (type(m.arrayOfMatchers) = "roArray")
                 for each matcherObj in m.arrayOfMatchers
                     if (matcherObj.doMatch(target))
@@ -126,7 +126,7 @@ function noneOf(arrayOfMatchers as Object) as Object
     matcher.append({
         arrayOfMatchers: arrayOfMatchers
 
-        doMatch: function (target as Dynamic)
+        doMatch: function (target as Dynamic) as Boolean
             if (type(m.arrayOfMatchers) = "roArray")
                 for each matcherObj in m.arrayOfMatchers
                     if (matcherObj.doMatch(target))
