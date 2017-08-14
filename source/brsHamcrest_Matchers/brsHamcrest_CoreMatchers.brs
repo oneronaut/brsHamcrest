@@ -18,6 +18,25 @@ function is (matcher as Object) as Object
 end function
 
 
+'A matcher that has the correct structure, but returns true to anything, for the purposes of integration with frameworks
+'
+'Example:
+'assertThat(foo, isAnything())
+'
+'@return {Object<Matcher>} A Matcher
+function isAnything () as Object
+    matcher = BaseMatcher()
+
+    matcher.append({
+        doMatch: function (target as Dynamic) as Boolean
+            return true
+        end function
+        })
+
+    return matcher
+end function
+
+
 'Creates a matcher that wraps an existing matcher, but inverts the logic by which it will match.
 'If passed an array, isNot() acts as a shortcut to noneOf()
 '
@@ -60,7 +79,7 @@ function allOf (arrayOfMatchers as Object) as Object
     matcher.append({
         arrayOfMatchers: arrayOfMatchers
 
-        doMatch: function (target as Dynamic)
+        doMatch: function (target as Dynamic) as Boolean
             failure = false
             if (type(m.arrayOfMatchers) = "roArray")
                 for each matcherObj in m.arrayOfMatchers
@@ -94,7 +113,7 @@ function anyOf (arrayOfMatchers as Object) as Object
     matcher.append({
         arrayOfMatchers: arrayOfMatchers
 
-        doMatch: function (target as Dynamic)
+        doMatch: function (target as Dynamic) as Boolean
             if (type(m.arrayOfMatchers) = "roArray")
                 for each matcherObj in m.arrayOfMatchers
                     if (matcherObj.doMatch(target))
@@ -126,7 +145,7 @@ function noneOf(arrayOfMatchers as Object) as Object
     matcher.append({
         arrayOfMatchers: arrayOfMatchers
 
-        doMatch: function (target as Dynamic)
+        doMatch: function (target as Dynamic) as Boolean
             if (type(m.arrayOfMatchers) = "roArray")
                 for each matcherObj in m.arrayOfMatchers
                     if (matcherObj.doMatch(target))

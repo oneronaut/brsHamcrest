@@ -212,6 +212,23 @@ sub test_isNot_arrayNoneTrue (t as Object)
 end sub
 
 
+'isAnything()
+sub test_isAnything (t as Object)
+    setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    knownTarget = {}
+
+    'WHEN'
+    result = isAnything().doMatch(knownTarget)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
 'allOf()
 sub test_allOf_allMatchersTrue (t as Object)
     test = setup_brsHamcrest_CoreMatchers()
