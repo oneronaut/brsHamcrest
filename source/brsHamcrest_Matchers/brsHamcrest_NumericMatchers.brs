@@ -1,7 +1,6 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
 
 
 'Matcher to test the given number is close to a value, within the given delta
@@ -15,12 +14,18 @@
 function closeTo (value as Float, delta as Float) as Object
     matcher = BaseMatcher()
 
-    matcher.value = value
-    matcher.delta = delta
+    matcher.append({
+        value: value
+        delta: delta
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        return (target >= m.value - m.delta AND target <= m.value + m.delta)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if assertThat(target, is(aNumber()))
+                return (target >= m.value - m.delta AND target <= m.value + m.delta)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function
@@ -36,11 +41,17 @@ end function
 function greaterThan (value as Float) as Object
     matcher = BaseMatcher()
 
-    matcher.value = value
+    matcher.append({
+        value: value
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        return (target > m.value)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if assertThat(target, is(aNumber()))
+                return (target > m.value)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function
@@ -56,11 +67,17 @@ end function
 function greaterThanOrEqualTo (value as Float) as Object
     matcher = BaseMatcher()
 
-    matcher.value = value
+    matcher.append({
+        value: value
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        return (target >= m.value)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if assertThat(target, is(aNumber()))
+                return (target >= m.value)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function
@@ -76,11 +93,17 @@ end function
 function lessThan (value as Float) as Object
     matcher = BaseMatcher()
 
-    matcher.value = value
+    matcher.append({
+        value: value
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        return (target < m.value)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if assertThat(target, is(aNumber()))
+                return (target < m.value)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function
@@ -96,11 +119,17 @@ end function
 function lessThanOrEqualTo (value as Float) as Object
     matcher = BaseMatcher()
 
-    matcher.value = value
+    matcher.append({
+        value: value
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        return (target <= m.value)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if assertThat(target, is(aNumber()))
+                return (target <= m.value)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function

@@ -1,7 +1,7 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
+
 
 ' SETUP / TEARDOWN
 
@@ -57,6 +57,66 @@ sub test_is_matcherFalse (t as Object)
 end sub
 
 
+sub test_is_arrayTrue (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    dummyTarget = {}
+    matcher1 = FakeBaseMatcher()
+    matcher1.willMatch = true
+    matcher2 = FakeBaseMatcher()
+    matcher2.willMatch = true
+    matcherArray = [matcher1, matcher2]
+
+    'WHEN'
+    result = is(matcherArray).doMatch(dummyTarget)
+
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
+sub test_is_arraySomeTrue (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    dummyTarget = {}
+    matcher1 = FakeBaseMatcher()
+    matcher1.willMatch = true
+    matcher2 = FakeBaseMatcher()
+    matcher2.willMatch = false
+    matcherArray = [matcher1, matcher2]
+
+    'WHEN'
+    result = is(matcherArray).doMatch(dummyTarget)
+
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
+sub test_is_arrayNoneTrue (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    dummyTarget = {}
+    matcher1 = FakeBaseMatcher()
+    matcher1.willMatch = false
+    matcher2 = FakeBaseMatcher()
+    matcher2.willMatch = false
+    matcherArray = [matcher1, matcher2]
+
+    'WHEN'
+    result = is(matcherArray).doMatch(dummyTarget)
+
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
 'isNot()
 sub test_isNot_matcherTrueResultFalse (t as Object)
     test = setup_brsHamcrest_CoreMatchers()
@@ -84,6 +144,83 @@ sub test_isNot_matcherFalseResultTrue (t as Object)
 
     'WHEN'
     result = isNot(matcher).doMatch(test.knownString)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
+sub test_isNot_arrayTrue (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    dummyTarget = {}
+    matcher1 = FakeBaseMatcher()
+    matcher1.willMatch = true
+    matcher2 = FakeBaseMatcher()
+    matcher2.willMatch = true
+    matcherArray = [matcher1, matcher2]
+
+    'WHEN'
+    result = isNot(matcherArray).doMatch(dummyTarget)
+
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
+sub test_isNot_arraySomeTrue (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    dummyTarget = {}
+    matcher1 = FakeBaseMatcher()
+    matcher1.willMatch = true
+    matcher2 = FakeBaseMatcher()
+    matcher2.willMatch = false
+    matcherArray = [matcher1, matcher2]
+
+    'WHEN'
+    result = isNot(matcherArray).doMatch(dummyTarget)
+
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
+sub test_isNot_arrayNoneTrue (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    dummyTarget = {}
+    matcher1 = FakeBaseMatcher()
+    matcher1.willMatch = false
+    matcher2 = FakeBaseMatcher()
+    matcher2.willMatch = false
+    matcherArray = [matcher1, matcher2]
+
+    'WHEN'
+    result = isNot(matcherArray).doMatch(dummyTarget)
+
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+
+'anything()
+sub test_anything (t as Object)
+    setup_brsHamcrest_CoreMatchers()
+
+    'GIVEN'
+    knownTarget = {}
+
+    'WHEN'
+    result = anything().doMatch(knownTarget)
 
     'THEN'
     t.assertTrue(result)

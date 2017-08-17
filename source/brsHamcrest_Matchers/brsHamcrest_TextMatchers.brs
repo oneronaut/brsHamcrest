@@ -1,7 +1,6 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
 
 
 'Matcher to test a value contains a given String
@@ -14,11 +13,17 @@
 function containsString (value as String) as Object
     matcher = BaseMatcher()
 
-    matcher.value = value
+    matcher.append({
+        value: value
 
-    matcher.doMatch = function (target as String) as Boolean
-        return (target.Instr(m.value) <> -1)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.Instr(m.value) <> -1)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function
@@ -34,17 +39,23 @@ end function
 function containsStrings (arrayOfStrings as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.stringArray = arrayOfStrings
+    matcher.append({
+        stringArray: arrayOfStrings
 
-    matcher.doMatch = function (target as String) as Boolean
-        for each s in m.stringArray
-            if (NOT containsString(s).doMatch(target))
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                for each s in m.stringArray
+                    if (NOT containsString(s).doMatch(target))
+                        return false
+                    end if
+                end for
+
+                return true
+            else
                 return false
             end if
-        end for
-
-        return true
-    end function
+        end function
+    })
 
     return matcher
 end function
@@ -60,27 +71,31 @@ end function
 function containsStringsInOrder (arrayOfStrings as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.stringArray = arrayOfStrings
+    matcher.append({
+        stringArray: arrayOfStrings
 
-    matcher.doMatch = function (target as String) as Boolean
-        failure = false
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                failure = false
+                lastPos = 0
+                for each s in m.stringArray
+                    position = Instr(1, target, s)
+                    if (position > lastPos)
+                        lastPos = position
+                    else
+                        failure = true
+                    end if
+                    if failure then exit for
+                end for
 
-        lastPos = 0
+                if (lastPos = 0) then failure = true
 
-        for each s in m.stringArray
-            position = Instr(1, target, s)
-            if (position > lastPos)
-                lastPos = position
+                return (NOT failure)
             else
-                failure = true
+                return false
             end if
-            if failure then exit for
-        end for
-
-        if (lastPos = 0) then failure = true
-
-        return (NOT failure)
-    end function
+        end function
+    })
 
     return matcher
 end function
@@ -96,11 +111,17 @@ end function
 function startsWithString (value as String) as Object
     matcher = BaseMatcher()
 
-    matcher.beginStr = value
+    matcher.append({
+        beginStr: value
 
-    matcher.doMatch = function (target as String) as Boolean
-        return (target.InStr(m.beginStr) = 0)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.InStr(m.beginStr) = 0)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function
@@ -116,11 +137,17 @@ end function
 function endsWithString (value as String) as Object
     matcher = BaseMatcher()
 
-    matcher.endStr = value
+    matcher.append({
+        endStr: value
 
-    matcher.doMatch = function (target as String) as Boolean
-        return (target.Right(m.endStr.Len()) = m.endStr)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.Right(m.endStr.Len()) = m.endStr)
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function
@@ -136,9 +163,16 @@ end function
 function anEmptyString () as Object
     matcher = BaseMatcher()
 
-    matcher.doMatch = function (target as String) as Boolean
-        return (target.Trim() = "")
-    end function
+    matcher.append({
+
+        doMatch: function (target as Dynamic) as Boolean
+            if AssertThat(target, is(aString()))
+                return (target.Trim() = "")
+            else
+                return false
+            end if
+        end function
+    })
 
     return matcher
 end function

@@ -36,6 +36,10 @@ assertThat(foo, isNot(aString()))
 assertThat(foo, is(allOf([aNumber(), lessThan(5)])))
 assertThat(foo, is(anyOf([anArray(), anAssociativeArray()])))
 assertThat(foo, is(noneOf([startsWithString("bar"), endsWithString("bar")])))
+
+' is() and isNot() can also accept arrays of Matchers to act as shortcuts to allOf() and noneOf() respectively
+assertThat(foo, is([anInteger(), lessThan(100)]))
+assertThat(foo, isNot([anEmptyCollection(), identicalTo(bar)]))
 ```
 As you can see in the examples, you can chain up Wrappers to form an easy to read assertion. This can read to some different structures but equal outputs, for example `isNot(anyOf())` is equal to `is(noneOf())`, it's up to you.
 
@@ -66,6 +70,10 @@ assertThat("foobar", containsStringsInOrder(["foo", "bar"]))
 assertThat(myArray, is(anEmptyCollection()))
 assertThat("foo", is(inCollection(["foo", "bar"])))
 assertThat(myAssocArray, containsKeyValuePairs({foo: "bar", someKey: "someValue"}))
+
+' Object Matchers
+assertThat(foo, is(sameObjectAs(bar)))
+assertThat(foo, is(identicalTo(bar)))
 ```
 
 Feel free to create your own Matchers, just extend from `BaseMatcher` and ensure that the `doMatch()` function returns a `Boolean`.

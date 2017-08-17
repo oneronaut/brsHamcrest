@@ -1,7 +1,7 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
+
 
 ' SETUP / TEARDOWN
 
@@ -187,6 +187,22 @@ sub test_anEmptyCollection_populatedXMLList (t as Object)
 end sub
 
 
+sub test_anEmptyCollection_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    incorrectType = "foo"
+
+    'WHEN'
+    result = anEmptyCollection().doMatch(incorrectType)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
 'containsKeys()
 sub test_containsKeys_assocArrayHasAllKeys (t as Object)
     test = setup_brsHamcrest_CollectionMatchers()
@@ -273,6 +289,23 @@ sub test_containsKeys_assocArrayIsEmpty (t as Object)
 end sub
 
 
+sub test_containsKeys_assocArrayIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    testKeyArray = ["foo", "bar"]
+    incorrectType = "foo"
+
+    'WHEN'
+    result = containsKeys(testKeyArray).doMatch(incorrectType)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
 'containsKeyValuePairs()
 sub test_containsKeyValuePairs_hasAllKeyValuePairs (t as Object)
     test = setup_brsHamcrest_CollectionMatchers()
@@ -317,6 +350,23 @@ sub test_containsKeyValuePairs_hasNoKeyValuePairs (t as Object)
 
     'WHEN'
     result = containsKeyValuePairs(testKeyValuePairArray).doMatch(testAssocArray)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
+sub test_containsKeyValuePairs_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    testKeyValuePairArray = {foo0: "bar0", foo1: "bar1", foo2: "bar2"}
+    incorrectType = "foo"
+
+    'WHEN'
+    result = containsKeyValuePairs(testKeyValuePairArray).doMatch(incorrectType)
 
     'THEN'
     t.assertFalse(result)

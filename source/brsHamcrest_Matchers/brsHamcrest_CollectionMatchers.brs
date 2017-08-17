@@ -1,7 +1,6 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
 
 
 'Matcher to test the given collection contains zero elements
@@ -13,15 +12,18 @@
 function anEmptyCollection () as Object
     matcher = BaseMatcher()
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        failure = false
-        if (isEnumerable(target))
-            if (NOT target.IsEmpty()) then failure = true
-        else
-            HamcrestError("Type Mismatch: The target object is not an enumerable type.")
-        end if
-        return (NOT failure)
-    end function
+    matcher.append({
+
+        doMatch: function (target as Dynamic) as Boolean
+            failure = false
+            if (IsEnumerable(target))
+                if (NOT target.IsEmpty()) then failure = true
+            else
+                failure = true
+            end if
+            return (NOT failure)
+        end function
+    })
 
     return matcher
 end function
@@ -37,27 +39,29 @@ end function
 function containsKeys (keyArray as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.keyArray = keyArray
+    matcher.append({
+        keyArray: keyArray
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        failure = false
-        if (type(m.keyArray) = "roArray")
-            if (NOT m.keyArray.IsEmpty())
-                if (HasInterface(target, "ifEnum"))
-                    for each key in m.keyArray
-                        if (target[key] = Invalid) then failure = true
-                    end for
+        doMatch: function (target as Dynamic) as Boolean
+            failure = false
+            if (type(m.keyArray) = "roArray")
+                if (NOT m.keyArray.IsEmpty())
+                    if (HasInterface(target, "ifEnum"))
+                        for each key in m.keyArray
+                            if (target[key] = Invalid) then failure = true
+                        end for
+                    else
+                        failure = true
+                    end if
                 else
-                    HamcrestError("Type Mismatch: Expected an enumerable type and encountered a "+type(target))
+                    failure = true
                 end if
             else
                 failure = true
             end if
-        else
-            HamcrestError("Type Mismatch: Expected a roArray and encountered a "+type(m.keyArray))
-        end if
-        return (NOT failure)
-    end function
+            return (NOT failure)
+        end function
+    })
 
     return matcher
 end function
@@ -73,19 +77,21 @@ end function
 function containsKeyValuePairs (keyValuePairs as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.keyValuePairs = keyValuePairs
+    matcher.append({
+        keyValuePairs: keyValuePairs
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        failure = false
-        if (type(target) = "roAssociativeArray" AND type(m.keyValuePairs) = "roAssociativeArray")
-            for each key in m.keyValuePairs
-                if (target[key] = Invalid OR (target[key] <> Invalid AND target[key] <> m.keyValuePairs[key])) then failure = true
-            end for
-        else
-            HamcrestError("Type Mismatch: Expected an Associative Array and encountered a "+type(target))
-        end if
-        return (NOT failure)
-    end function
+        doMatch: function (target as Dynamic) as Boolean
+            failure = false
+            if (type(target) = "roAssociativeArray" AND type(m.keyValuePairs) = "roAssociativeArray")
+                for each key in m.keyValuePairs
+                    if (target[key] = Invalid OR (target[key] <> Invalid AND target[key] <> m.keyValuePairs[key])) then failure = true
+                end for
+            else
+                failure = true
+            end if
+            return (NOT failure)
+        end function
+    })
 
     return matcher
 end function
@@ -101,30 +107,32 @@ end function
 function inCollection (collection as Object) as Object
     matcher = BaseMatcher()
 
-    matcher.collection = collection
+    matcher.append({
+        collection: collection
 
-    matcher.doMatch = function (target as Dynamic) as Boolean
-        if (isEnumerable(m.collection))
-            for each value in m.collection
-                if (isEnumerable(value))
-                    if (inCollection(value).doMatch(target))
-                        return true
-                    end if
-                else if (type(target) = "roAssociativeArray")
-                    for each targetKey in target
-                        if (targetKey = value AND target[targetKey] = m.collection[value])
+        doMatch: function (target as Dynamic) as Boolean
+            if (IsEnumerable(m.collection))
+                for each value in m.collection
+                    if (IsEnumerable(value))
+                        if (inCollection(value).doMatch(target))
                             return true
                         end if
-                    end for
-                else if (value = target)
-                    return true
-                end if
-            end for
-        else
-            HamcrestError("Type Mismatch: Expected a Collection (implements ifEnum) and encountered a "+type(m.collection))
-        end if
-        return false
-    end function
+                    else if (type(target) = "roAssociativeArray")
+                        for each targetKey in target
+                            if (targetKey = value AND target[targetKey] = m.collection[value])
+                                return true
+                            end if
+                        end for
+                    else if (value = target)
+                        return true
+                    end if
+                end for
+            else
+                HamcrestError("Type Mismatch: Expected a Collection (implements ifEnum) and encountered a "+type(m.collection))
+            end if
+            return false
+        end function
+    })
 
     return matcher
 end function

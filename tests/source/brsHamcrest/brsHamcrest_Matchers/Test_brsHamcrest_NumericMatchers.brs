@@ -1,7 +1,7 @@
 ' #################################################################
 ' ###   brsHamcrest   ###   github.com/imbenjamin/brsHamcrest   ###
 ' #################################################################
-'                 Copyright (c) 2016 Benjamin Hill
+
 
 ' SETUP / TEARDOWN
 
@@ -138,6 +138,24 @@ sub test_closeTo_IntNotCloseFloat (t as Object)
 end sub
 
 
+sub test_closeTo_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_NumericMatchers()
+
+    'GIVEN'
+    testTarget = "foo"
+    testValue = test.knownSmallFloat
+    testDelta = test.knownTinyInt
+
+    'WHEN'
+    result = closeTo(testValue, testDelta).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_NumericMatchers()
+end sub
+
+
 'greaterThan()
 sub test_greaterThan_IntGreaterThanInt (t as Object)
     test = setup_brsHamcrest_NumericMatchers()
@@ -202,6 +220,23 @@ sub test_greaterThan_FloatSmallerThanFloat (t as Object)
 
     'THEN'
     t.assertTrue(result)
+
+    teardown_brsHamcrest_NumericMatchers()
+end sub
+
+
+sub test_greaterThan_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_NumericMatchers()
+
+    'GIVEN'
+    testTarget = "foo"
+    testValue = test.knownSmallFloat
+
+    'WHEN'
+    result = greaterThan(testValue).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
 
     teardown_brsHamcrest_NumericMatchers()
 end sub
@@ -310,6 +345,23 @@ sub test_greaterThanOrEqualTo_FloatLessThanFloat (t as Object)
 end sub
 
 
+sub test_greaterThanOrEqualTo_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_NumericMatchers()
+
+    'GIVEN'
+    testTarget = "foo"
+    testValue = test.knownBigFloat
+
+    'WHEN'
+    result = greaterThanOrEqualTo(testValue).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_NumericMatchers()
+end sub
+
+
 'lessThan()
 sub test_lessThan_IntGreaterThanInt (t as Object)
     test = setup_brsHamcrest_NumericMatchers()
@@ -374,6 +426,23 @@ sub test_lessThan_FloatSmallerThanFloat (t as Object)
 
     'THEN'
     t.assertTrue(result)
+
+    teardown_brsHamcrest_NumericMatchers()
+end sub
+
+
+sub test_lessThan_targetIsIncorrectType (t as Object)
+    test = setup_brsHamcrest_NumericMatchers()
+
+    'GIVEN'
+    testTarget = "foo"
+    testValue = test.knownBigFloat
+
+    'WHEN'
+    result = lessThan(testValue).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
 
     teardown_brsHamcrest_NumericMatchers()
 end sub
@@ -477,6 +546,23 @@ sub test_lessThanOrEqualTo_FloatLessThanFloat (t as Object)
 
     'THEN'
     t.assertTrue(result)
+
+    teardown_brsHamcrest_NumericMatchers()
+end sub
+
+
+sub test_lessThanOrEqualTo_isIncorrectType (t as Object)
+    test = setup_brsHamcrest_NumericMatchers()
+
+    'GIVEN'
+    testTarget = "foo"
+    testValue = test.knownBigFloat
+
+    'WHEN'
+    result = lessThanOrEqualTo(testValue).doMatch(testTarget)
+
+    'THEN'
+    t.assertFalse(result)
 
     teardown_brsHamcrest_NumericMatchers()
 end sub
