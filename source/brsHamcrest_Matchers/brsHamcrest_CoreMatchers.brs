@@ -21,10 +21,10 @@ end function
 'A matcher that has the correct structure, but returns true to anything, for the purposes of integration with frameworks
 '
 'Example:
-'assertThat(foo, isAnything())
+'assertThat(foo, anything())
 '
 '@return {Object<Matcher>} A Matcher
-function isAnything () as Object
+function anything () as Object
     matcher = BaseMatcher()
 
     matcher.append({

@@ -212,15 +212,15 @@ sub test_isNot_arrayNoneTrue (t as Object)
 end sub
 
 
-'isAnything()
-sub test_isAnything (t as Object)
+'anything()
+sub test_anything (t as Object)
     setup_brsHamcrest_CoreMatchers()
 
     'GIVEN'
     knownTarget = {}
 
     'WHEN'
-    result = isAnything().doMatch(knownTarget)
+    result = anything().doMatch(knownTarget)
 
     'THEN'
     t.assertTrue(result)
