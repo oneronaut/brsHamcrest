@@ -162,7 +162,7 @@ end sub
 
 ' IsEnumerable()
 sub test_IsEnumerable_true (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     foo = CreateObject("roAssociativeArray")
@@ -177,7 +177,7 @@ sub test_IsEnumerable_true (t as Object)
 end sub
 
 sub test_IsEnumerable_false (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     foo = CreateObject("roDateTime")
@@ -193,7 +193,7 @@ end sub
 
 
 sub test_coreDoMatch_withIdenticalDataTypes (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     getFooObj = function () as Object
@@ -216,7 +216,7 @@ end sub
 
 
 sub test_coreDoMatch_withDifferentDataTypes (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     getFooObj = function () as Object
@@ -245,7 +245,7 @@ end sub
 
 
 sub test_coreDoMatch_withSameKeysDifferentValues (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     getFooObj = function () as Object
@@ -273,7 +273,7 @@ end sub
 
 
 sub test_coreDoMatch_withIdenticalAPI (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     getFooObj = function () as Object
@@ -296,7 +296,7 @@ end sub
 
 
 sub test_coreDoMatch_withDifferentAPI (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     getFooObj = function () as Object
@@ -323,7 +323,7 @@ end sub
 
 
 sub test_coreDoMatch_withIdenticalCollectionDataTypes (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     getFooObj = function () as Object
@@ -345,7 +345,7 @@ end sub
 
 
 sub test_coreDoMatch_withdifferentCollectionData (t as Object)
-    test = setup_brsHamcrest_Helpers
+    test = setup_brsHamcrest_Helpers()
 
     'GIVEN'
     getFooObj = function () as Object
@@ -364,6 +364,73 @@ sub test_coreDoMatch_withdifferentCollectionData (t as Object)
     result = coreDoMatch(target, comparison)
     'THEN'
     t.assertFalse(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_coreDoMatch_withNonStrictTypeMatching (t as Object)
+    test = setup_brsHamcrest_Helpers()
+
+    'GIVEN'
+    target = {
+        propString: "foo"
+        propBoolean: true
+        propInteger: 2
+        propNumber:  1.2345
+    }
+    'XXX: Parsing the object as a json string will create non-strict types (e.g. "String"
+    '     instead of "roString"). But these properties should still actually match.
+    comparison = ParseJson("{""propString"": ""foo"",""propBoolean"": true,""propInteger"": 2,""propNumber"": 1.2345}")
+    'WHEN'
+    result = coreDoMatch(target, comparison)
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_BrsHamcrestNormaliseType_normaliseAllTypes (t as Object)
+    test = setup_brsHamcrest_Helpers()
+
+    'WHEN'
+    normalisedRoArrayType = BrsHamcrestNormaliseType("roArray")
+    normalisedRoAssocArrayType = BrsHamcrestNormaliseType("roAssociativeArray")
+    normalisedRoBooleanType = BrsHamcrestNormaliseType("roBoolean")
+    normalisedBooleanType = BrsHamcrestNormaliseType("Boolean")
+    normalisedRoDoubleType = BrsHamcrestNormaliseType("roDouble")
+    normalisedDoubleType = BrsHamcrestNormaliseType("Double")
+    normalisedRoIntrinsicDoubleType = BrsHamcrestNormaliseType("roIntrinsicDouble")
+    normalisedRoFloatType = BrsHamcrestNormaliseType("roFloat")
+    normalisedFloatType = BrsHamcrestNormaliseType("Float")
+    normalisedRoFunctionType = BrsHamcrestNormaliseType("roFunction")
+    normalisedFunctionType = BrsHamcrestNormaliseType("Function")
+    normalisedRoIntegerType = BrsHamcrestNormaliseType("roInteger")
+    normalisedRoIntType = BrsHamcrestNormaliseType("roInt")
+    normalisedIntegerType = BrsHamcrestNormaliseType("Integer")
+    normalisedRoLongIntegerType = BrsHamcrestNormaliseType("roLongInteger")
+    normalisedLongIntegerType = BrsHamcrestNormaliseType("LongInteger")
+    normalisedStringType = BrsHamcrestNormaliseType("String")
+    normalisedRoStringType = BrsHamcrestNormaliseType("roString")
+
+    'THEN'
+    t.assertEqual("roArray", normalisedRoArrayType)
+    t.assertEqual("roAssociativeArray", normalisedRoAssocArrayType)
+    t.assertEqual("roDouble", normalisedRoDoubleType)
+    t.assertEqual("roDouble", normalisedDoubleType)
+    t.assertEqual("roDouble", normalisedRoIntrinsicDoubleType)
+    t.assertEqual("roFloat", normalisedRoFloatType)
+    t.assertEqual("roFloat", normalisedFloatType)
+    t.assertEqual("roFunction", normalisedRoFunctionType)
+    t.assertEqual("roFunction", normalisedFunctionType)
+    t.assertEqual("roInteger", normalisedRoIntegerType)
+    t.assertEqual("roInteger", normalisedRoIntType)
+    t.assertEqual("roInteger", normalisedIntegerType)
+    t.assertEqual("roLongInteger", normalisedRoLongIntegerType)
+    t.assertEqual("roLongInteger", normalisedLongIntegerType)
+    t.assertEqual("roString", normalisedStringType)
+    t.assertEqual("roString", normalisedRoStringType)
 
     teardown_brsHamcrest_Helpers()
 end sub
