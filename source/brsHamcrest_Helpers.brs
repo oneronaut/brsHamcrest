@@ -64,8 +64,8 @@ end function
 '@param obj {Dynamic} the comparison to compare against
 '@return {Boolean} true if the target and comparison are identical
 function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
-    targetType = type(target)
-    comparisonType = type(comparison)
+    targetType = BrsHamcrestNormaliseType(type(target))
+    comparisonType = BrsHamcrestNormaliseType(type(comparison))
 
     if (targetType = comparisonType)
 
@@ -84,7 +84,7 @@ function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
             if (targetItemCount = comparisonItems.Count())
 
                 for i=0 to targetItemCount-1 step 1
-                    if (targetItems[i].key <> comparisonItems[i].key)
+                    if (LCase(targetItems[i].key) <> LCase(comparisonItems[i].key))
                         return false
                     else
                         if (coreDoMatch(targetItems[i].value, comparisonItems[i].value) = false) return false
@@ -108,4 +108,42 @@ function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
     end if
 
     return true
+end function
+
+
+'Return a normalised type-value to handle the fact that calling type(target) can vary in the actual type-value returned.
+'
+'@param typeIn {String} the type-value to normalise
+'@return {String} the normalised type-value
+function BrsHamcrestNormaliseType (typeIn as String) as String
+
+        types = {
+            roArray: "roArray"
+            roAssociativeArray: "roAssociativeArray"
+            roBoolean: "roBoolean"
+            Boolean: "roBoolean"
+            roDouble: "roDouble"
+            Double: "roDouble"
+            roIntrinsicDouble: "roDouble"
+            roFloat: "roFloat"
+            Float: "roFloat"
+            roFunction: "roFunction"
+            Function: "roFunction"
+            roInteger: "roInteger"
+            roInt: "roInteger"
+            Integer: "roInteger"
+            roLongInteger: "roLongInteger"
+            LongInteger: "roLongInteger"
+            roString: "roString"
+            String: "roString"
+        }
+
+        if (types.DoesExist(typeIn))
+            typeOut = types[typeIn]
+        else
+            HamcrestError("Unsupported type cannot be normalised")
+            typeOut = "<ERROR:UNSUPPORTED_TYPE>"
+        end if
+
+        return typeOut
 end function
