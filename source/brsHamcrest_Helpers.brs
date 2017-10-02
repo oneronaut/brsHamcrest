@@ -138,5 +138,12 @@ function BrsHamcrestNormaliseType (typeIn as String) as String
             String: "roString"
         }
 
-        return types[typeIn]
+        if (types.DoesExist(typeIn))
+            typeOut = types[typeIn]
+        else
+            HamcrestError("Unsupported type cannot be normalised")
+            typeOut = "<ERROR:UNSUPPORTED_TYPE>"
+        end if
+
+        return typeOut
 end function

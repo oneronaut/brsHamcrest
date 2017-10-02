@@ -391,7 +391,7 @@ sub test_coreDoMatch_withNonStrictTypeMatching (t as Object)
 end sub
 
 
-sub test_BrsHamcrestNormaliseType_normaliseAllTypes (t as Object)
+sub test_BrsHamcrestNormaliseType_normaliseAllKnownTypes (t as Object)
     test = setup_brsHamcrest_Helpers()
 
     'WHEN'
@@ -431,6 +431,19 @@ sub test_BrsHamcrestNormaliseType_normaliseAllTypes (t as Object)
     t.assertEqual("roLongInteger", normalisedLongIntegerType)
     t.assertEqual("roString", normalisedStringType)
     t.assertEqual("roString", normalisedRoStringType)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
+sub test_BrsHamcrestNormaliseType_normaliseUnknownTypes (t as Object)
+    test = setup_brsHamcrest_Helpers()
+
+    'WHEN'
+    normalisedUnknownType = BrsHamcrestNormaliseType("unknownType")
+
+    'THEN'
+    t.assertEqual(normalisedUnknownType, "<ERROR:UNSUPPORTED_TYPE>")
 
     teardown_brsHamcrest_Helpers()
 end sub
