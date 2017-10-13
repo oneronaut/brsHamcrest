@@ -391,6 +391,30 @@ sub test_coreDoMatch_withNonStrictTypeMatching (t as Object)
 end sub
 
 
+sub test_coreDoMatch_withItemsApiMethodOverwritten (t as Object)
+    test = setup_brsHamcrest_Helpers()
+
+    'GIVEN'
+    getFooObj = function () as Object
+        return {
+            items: ["item1","item2","item3"]
+            knownString: "knownStringParam"
+            knownInteger: 1
+            knownBoolean: true
+            knownFloat: 1/3
+            knownDouble: 2.3#
+            knownLongInteger: 987654321&
+        }
+    end function
+    'WHEN'
+    result = coreDoMatch(getFooObj(), getFooObj())
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_Helpers()
+end sub
+
+
 sub test_BrsHamcrestNormaliseType_normaliseAllKnownTypes (t as Object)
     test = setup_brsHamcrest_Helpers()
 
