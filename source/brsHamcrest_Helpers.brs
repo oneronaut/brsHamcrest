@@ -64,6 +64,7 @@ end function
 '@param obj {Dynamic} the comparison to compare against
 '@return {Boolean} true if the target and comparison are identical
 function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
+
     targetType = BrsHamcrestNormaliseType(type(target))
     comparisonType = BrsHamcrestNormaliseType(type(comparison))
 
