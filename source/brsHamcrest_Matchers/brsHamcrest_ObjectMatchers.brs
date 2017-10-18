@@ -17,19 +17,33 @@ function sameObjectAs (value as Object) as Object
         value: value
 
         doMatch: function (target as Dynamic) as Boolean
+            result = false
             if (HasInterface(target, "ifAssociativeArray") AND HasInterface(m.value, "ifAssociativeArray"))
-                result = False
-                deviceInfo = CreateObject("roDeviceInfo")
-                uuidKey = "brsHamcrestUUID"
-                uuidValue = deviceInfo.GetRandomUUID()
-                target.AddReplace(uuidKey, uuidValue)
-                if (m.value.Lookup(uuidKey) = uuidValue) then result = True
-                target.Delete(uuidKey)
-                m.value.Delete(uuidKey)
-                return result
+                result = m._isSameObject(target, m.value)
+            else if (HasInterface(target, "ifArray") AND HasInterface(m.value, "ifArray"))
+                targetObj = {}
+                target.push(targetObj)
+                valueObj = m.value[m.value.count()-1]
+                if HasInterface(valueObj, "ifAssociativeArray") AND m._isSameObject(targetObj, valueObj)
+                    result = true
+                end if
+                target.pop()
             else
-                return False
+                result = False
             end if
+            return result
+        end function
+
+        _isSameObject: function (target as dynamic, value as dynamic) as Boolean
+            result = False
+            deviceInfo = CreateObject("roDeviceInfo")
+            uuidKey = "brsHamcrestUUID"
+            uuidValue = deviceInfo.GetRandomUUID()
+            target.AddReplace(uuidKey, uuidValue)
+            if (value.Lookup(uuidKey) = uuidValue) then result = True
+            target.Delete(uuidKey)
+            value.Delete(uuidKey)
+            return result
         end function
     })
 
@@ -51,7 +65,7 @@ function identicalTo (value as Object) as Object
         value: value
 
         doMatch: function (target as Dynamic) as Boolean
-            if (HasInterface(target, "ifAssociativeArray") AND HasInterface(m.value, "ifAssociativeArray"))
+            if (IsEnumerable(target) AND IsEnumerable(m.value))
                 return coreDoMatch(target, m.value)
             else
                 return False
