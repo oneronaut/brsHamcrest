@@ -415,6 +415,63 @@ sub test_coreDoMatch_withItemsApiMethodOverwritten (t as Object)
 end sub
 
 
+
+
+
+sub test_coreDoMatch_targetAndValueAreIdenticalObjects_withDifferentKeyOrder (t as Object)
+    test = setup_brsHamcrest_ObjectMatchers()
+
+    'GIVEN'
+    testTarget = {
+        lorem: false
+        ipsum: "dolor sit amet"
+        consectetur: "adipiscing elit"
+        sed: "do"
+        eiusmod: "tempor"
+        incididunt: 0
+        ut: "labore et dolore"
+        magna : "aliqua"
+        enim: "ad minim veniam"
+        quis: 20.99
+        nostrud: "exercitation ullamco laboris"
+        nisi: false
+        aliquip: "ex ea commodo"
+        consequat: "Duis aute irure dolor"
+        reprehenderit: "in voluptate velit esse "
+        cillum: "dolore eu fugiat nulla"
+        pariatur: true
+    }
+
+    testValue = {
+        consectetur: "adipiscing elit"
+        lorem: false
+        pariatur: true
+        sed: "do"
+        cillum: "dolore eu fugiat nulla"
+        eiusmod: "tempor"
+        nostrud: "exercitation ullamco laboris"
+        reprehenderit: "in voluptate velit esse "
+        ut: "labore et dolore"
+        consequat: "Duis aute irure dolor"
+        magna : "aliqua"
+        aliquip: "ex ea commodo"
+        nisi: false
+        ipsum: "dolor sit amet"
+        enim: "ad minim veniam"
+        quis: 20.99
+        incididunt: 0
+    }
+
+    'WHEN'
+    result = coreDoMatch(testTarget, testValue)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_ObjectMatchers()
+end sub
+
+
 sub test_BrsHamcrestNormaliseType_normaliseAllKnownTypes (t as Object)
     test = setup_brsHamcrest_Helpers()
 

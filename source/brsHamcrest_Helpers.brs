@@ -68,19 +68,7 @@ function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
     targetType = BrsHamcrestNormaliseType(type(target))
     comparisonType = BrsHamcrestNormaliseType(type(comparison))
 
-    'XXX: This inline function replaces the use of the native ifAssociativeArray.items(),
-    '     which can actually be overwritten and therefore unavailable. This often occurs, 
-    '     for example, when parsing json data.
-    _getItems = function (target as Object) as Object
-        items = []
-        for each item in target
-            items.push({key:item,value:target[item]})
-        end for
-        return items
-    end function
-
     if (targetType = comparisonType)
-
         if (targetType = "roArray")
             if (target.count() = comparison.count())
                 for i=0 to target.count()-1 Step 1
@@ -90,17 +78,9 @@ function coreDoMatch (target as Dynamic, comparison as Dynamic) as Boolean
                 return false
             end if
         else if (targetType = "roAssociativeArray")
-            targetItems = _getItems(target)
-            comparisonItems = _getItems(comparison)
-            targetItemCount = targetItems.Count()
-            if (targetItemCount = comparisonItems.Count())
-
-                for i=0 to targetItemCount-1 step 1
-                    if (LCase(targetItems[i].key) <> LCase(comparisonItems[i].key))
-                        return false
-                    else
-                        if (coreDoMatch(targetItems[i].value, comparisonItems[i].value) = false) return false
-                    end if
+            if (target.Count() = comparison.Count())
+                for each key in target
+                    if (coreDoMatch(target.LookupCI(key), comparison.LookupCI(key)) = false) return false
                 end for
             else
                 return false
