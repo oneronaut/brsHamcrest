@@ -415,6 +415,63 @@ sub test_coreDoMatch_withItemsApiMethodOverwritten (t as Object)
 end sub
 
 
+
+
+
+sub test_coreDoMatch_targetAndValueAreIdenticalObjects_withDifferentKeyOrder (t as Object)
+    test = setup_brsHamcrest_ObjectMatchers()
+
+    'GIVEN'
+    testTarget = {
+        active: false
+        buttonid: "14_DAYS_CINEMA_TRIAL"
+        buttontext: "Start free trial"
+        category: "CINEMA"
+        colour: "#HEX111"
+        index: 0
+        itemtype: "TRIAL_SUBSCRIPTION"
+        offerid: "C_003088"
+        priceIncreaseMessage: "Movies trial Price increase message"
+        priceIncreasePrice: 20.99
+        priceIncreaseText: "Movies trial price increase text"
+        queued: false
+        sectionnavigation: "MOVIES"
+        statustext: "Start your 14 day free trial"
+        ticketuri: "pkg:/images/account/movies_inactive.png"
+        title: "Sky Cinema 14 Days Trial"
+        trial: true
+    }
+
+    testValue = {
+        itemtype: "TRIAL_SUBSCRIPTION"
+        buttonid: "14_DAYS_CINEMA_TRIAL"
+        category: "CINEMA"
+        priceIncreaseMessage: "Movies trial Price increase message"
+        buttontext: "Start free trial"
+        colour: "#HEX111"
+        offerid: "C_003088"
+        index: 0
+        trial: true
+        title: "Sky Cinema 14 Days Trial"
+        statustext: "Start your 14 day free trial"
+        priceIncreasePrice: 20.99
+        priceIncreaseText: "Movies trial price increase text"
+        queued: false
+        active: false
+        sectionnavigation: "MOVIES"
+        ticketuri: "pkg:/images/account/movies_inactive.png"
+    }
+
+    'WHEN'
+    result = coreDoMatch(testTarget, testValue)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_ObjectMatchers()
+end sub
+
+
 sub test_BrsHamcrestNormaliseType_normaliseAllKnownTypes (t as Object)
     test = setup_brsHamcrest_Helpers()
 
