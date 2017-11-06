@@ -324,6 +324,23 @@ sub test_containsKeyValuePairs_hasAllKeyValuePairs (t as Object)
 end sub
 
 
+sub test_containsKeyValuePairs_hasComplexKeyValuePairs (t as Object)
+    test = setup_brsHamcrest_CollectionMatchers()
+
+    'GIVEN'
+    testKeyValuePairArray = {foo0: {subFoo0:{foo:true,bar:"2"}, subFoo2:true}, foo1: [0,5,2,8,7,8,9,3,1,1], foo2: "bar2"}
+    testAssocArray = {foo0: {subFoo0:{foo:true,bar:"2"}, subFoo2:true}, foo1: [0,5,2,8,7,8,9,3,1,1], foo2: "bar2"}
+
+    'WHEN'
+    result = containsKeyValuePairs(testKeyValuePairArray).doMatch(testAssocArray)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CollectionMatchers()
+end sub
+
+
 sub test_containsKeyValuePairs_hasSomeKeyValuePairs (t as Object)
     test = setup_brsHamcrest_CollectionMatchers()
 
