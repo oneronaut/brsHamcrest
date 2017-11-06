@@ -84,7 +84,7 @@ function containsKeyValuePairs (keyValuePairs as Object) as Object
             failure = false
             if (type(target) = "roAssociativeArray" AND type(m.keyValuePairs) = "roAssociativeArray")
                 for each key in m.keyValuePairs
-                    if (target[key] = Invalid OR (target[key] <> Invalid AND target[key] <> m.keyValuePairs[key])) then failure = true
+                    if (target[key] = Invalid OR (target[key] <> Invalid AND NOT coreDoMatch(target[key], m.keyValuePairs[key]))) then failure = true
                 end for
             else
                 failure = true
