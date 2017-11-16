@@ -162,3 +162,25 @@ function noneOf(arrayOfMatchers as Object) as Object
 
     return matcher
 end function
+
+
+'Creates a matcher that does an exact match, only passing if an exact match of both value and type are made.
+'
+'Example:
+'assertThat(foo, is(equalTo(bar)))
+'
+'@param comparison - any value
+'@return {Object<Matcher>} A Matcher
+function equalTo(value as Dynamic) as Object
+    matcher = BaseMatcher()
+
+    matcher.append({
+        value: value
+
+        doMatch: function (target as Dynamic) as Boolean
+            return coreDoMatch(target, m.value)
+        end function
+    })
+
+    return matcher
+end function
