@@ -437,3 +437,30 @@ sub test_noneOf_noMatchersTrue (t as Object)
 
     teardown_brsHamcrest_CoreMatchers()
 end sub
+
+
+'equalTo()
+
+sub test_equalTo_matchesIdenticalValues (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'WHEN'
+    result = equalTo(test.knownString).doMatch(test.knownString)
+
+    'THEN'
+    t.assertTrue(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
+
+sub test_equalTo_doesNotMatchDifferentValues (t as Object)
+    test = setup_brsHamcrest_CoreMatchers()
+
+    'WHEN'
+    result = equalTo(true).doMatch(false)
+
+    'THEN'
+    t.assertFalse(result)
+
+    teardown_brsHamcrest_CoreMatchers()
+end sub
