@@ -25,7 +25,7 @@ function BaseMatcher () as Object
         '@param targetMatcher {Dynamic} The matcher to perform the match on
         '@return {Boolean} true if the matched criteria are identical
         isSameMatch: function (targetMatcher as Dynamic) as Boolean
-            return CoreDoMatch(targetMatcher, m)
+            return equalTo(m).doMatch(targetMatcher)
         end function
     }
 

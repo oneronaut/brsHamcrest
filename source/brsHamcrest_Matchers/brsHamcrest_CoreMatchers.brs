@@ -171,14 +171,83 @@ end function
 '
 '@param comparison - any value
 '@return {Object<Matcher>} A Matcher
-function equalTo(value as Dynamic) as Object
+function equalTo(comparison as Dynamic) as Object
     matcher = BaseMatcher()
 
     matcher.append({
-        value: value
+        comparison: comparison
 
         doMatch: function (target as Dynamic) as Boolean
-            return coreDoMatch(target, m.value)
+            targetType = m._normaliseType(type(target))
+            comparisonType = m._normaliseType(type(m.comparison))
+
+            if (targetType = comparisonType)
+                if (targetType = "roArray")
+                    if (target.count() = m.comparison.count())
+                        for i=0 to target.count()-1 Step 1
+                            if (equalTo(m.comparison[i]).doMatch(target[i]) = false) return false
+                        end for
+                    else
+                        return false
+                    end if
+                else if (targetType = "roAssociativeArray")
+                    if (target.Count() = m.comparison.Count())
+                        for each key in target
+                            if (equalTo(m.comparison.LookupCI(key)).doMatch(target.LookupCI(key)) = false) return false
+                        end for
+                    else
+                        return false
+                    end if
+
+                else if (targetType = "roBoolean" OR targetType = "roDouble" OR targetType = "roFloat" OR targetType = "roInteger" OR targetType = "roLongInteger" OR targetType = "roString" OR targetType = "roInvalid")
+                    return (target = m.comparison)
+
+                else if (targetType = "roFunction")
+                    return (target.toStr() = m.comparison.toStr())
+
+                else
+                    return (targetType = comparisonType)
+                end if
+            else
+                return false
+            end if
+
+            return true
+        end function
+
+        _normaliseType: function (typeIn as String) as String
+
+                types = {
+                    "roArray": "roArray"
+                    "roAssociativeArray": "roAssociativeArray"
+                    "roBoolean": "roBoolean"
+                    "Boolean": "roBoolean"
+                    "roDouble": "roDouble"
+                    "Double": "roDouble"
+                    "roIntrinsicDouble": "roDouble"
+                    "roFloat": "roFloat"
+                    "Float": "roFloat"
+                    "roFunction": "roFunction"
+                    "Function": "roFunction"
+                    "roInteger": "roInteger"
+                    "roInt": "roInteger"
+                    "Integer": "roInteger"
+                    "roLongInteger": "roLongInteger"
+                    "LongInteger": "roLongInteger"
+                    "roString": "roString"
+                    "String": "roString"
+                    "roInvalid": "roInvalid"
+                    "Invalid": "roInvalid"
+                }
+
+                if (types.DoesExist(typeIn))
+                    typeOut = types[typeIn]
+                else
+                    HamcrestError("Unsupported type cannot be normalised")
+                    typeOut = "<ERROR:UNSUPPORTED_TYPE>"
+                end if
+
+                return typeOut
         end function
     })
 
