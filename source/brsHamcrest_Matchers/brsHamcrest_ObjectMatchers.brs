@@ -58,6 +58,7 @@ end function
 '
 '@param value {Object} The object to compare against
 '@return {Object<Matcher>} A Matcher
+'@deprecated use EqualTo() instead for complex object matching
 function identicalTo (value as Object) as Object
     matcher = BaseMatcher()
 
@@ -66,7 +67,7 @@ function identicalTo (value as Object) as Object
 
         doMatch: function (target as Dynamic) as Boolean
             if (IsEnumerable(target) AND IsEnumerable(m.value))
-                return coreDoMatch(target, m.value)
+                return equalTo(m.value).doMatch(target)
             else
                 return False
             end if
