@@ -1,0 +1,12 @@
+{
+  "name": "brshamcrest",
+  "version": "1.0.0",
+  "description": "Hamcrest implementation in BrightScript",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oneronaut/brsHamcrest.git"
+  },
+  "author": "oneronaut",
+  "license": "ISC"
+}
